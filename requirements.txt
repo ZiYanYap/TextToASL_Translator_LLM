@@ -1,4 +1,3 @@
-transformers
-torch
-accelerate
+python-dotenv
+huggingface-hub
 Flask
