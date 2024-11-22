@@ -1,0 +1,114 @@
+/* Reset default browser styles */
+body, h1, h2, p, form, textarea, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* General body styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #121212; /* Dark black background */
+    color: #ffffff; /* White text */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container styling */
+.container {
+    width: 90%;
+    max-width: 500px;
+    background-color: #1f1f1f; /* Slightly lighter black */
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+}
+
+/* Heading styling */
+h1 {
+    font-size: 24px;
+    color: #f5f5f5; /* Slightly lighter white */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Form styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Input text area */
+textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #444;
+    border-radius: 8px;
+    resize: none;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+textarea:focus {
+    border-color: #ffffff;
+}
+
+/* Button styling */
+button {
+    padding: 10px;
+    font-size: 18px;
+    color: #ffffff;
+    background-color: #000000; /* Bold black button */
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* Output section */
+.output {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.output h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+}
+
+.output p {
+    font-size: 16px;
+    color: #f5f5f5;
+}
+
+/* ASL translation */
+.asl-output {
+    font-size: 20px;
+    font-weight: bold;
+    color: #00ffcc; /* Unique cyan for ASL text */
+}
+
+/* Error message */
+.error {
+    color: #ff4d4d; /* Bright red for errors */
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 15px;
+}

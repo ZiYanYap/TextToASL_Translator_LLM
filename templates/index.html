@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to ASL Translator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Text to ASL Translator</h1>
+        
+        <form method="POST">
+            <textarea name="input_text" id="input_text" placeholder="Type your text here...">{{ original_text if original_text else "" }}</textarea>
+            <button type="submit">Convert</button>
+        </form>
+
+        <!-- Display results -->
+        {% if asl_translation %}
+        <div class="output">
+            <p class="asl-output">{{ asl_translation }}</p>
+        </div>
+        {% elif error %}
+        <div class="error">
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
