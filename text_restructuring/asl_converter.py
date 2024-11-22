@@ -10,7 +10,6 @@ api_token = os.getenv("HUGGINGFACE_TOKEN")
 if not api_token:
     raise ValueError("HUGGINGFACE_TOKEN not found in environment variables")
 
-# Initialize client and model
 client = InferenceClient(token=api_token)
 model = "Qwen/Qwen2.5-72B-Instruct"
 system_message = {"role": "system", "content": SYSTEM_PROMPT}
