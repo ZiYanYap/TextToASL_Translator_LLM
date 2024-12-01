@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supported Words</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Supported Words</h1>
+      {% set total_words = namespace(count=0) %}
+      {% for word_group in words %}
+      {% set total_words.count = total_words.count + word_group|length %}
+      {% endfor %}
+      <div class="word-count">Total Words: {{ total_words.count }}</div>
+
+      <nav class="nav-links">
+        <a href="{{ url_for('index') }}" class="nav-button">ASL Translator</a>
+        <a href="{{ url_for('words_list') }}" class="nav-button active">View Supported Words</a>
+        <a href="{{ url_for('metadata') }}" class="nav-button">Add a Word</a>
+      </nav>
+    </header>
+
+    <main class="words-container">
+      <div class="search-box">
+        <input type="text" id="wordSearch" placeholder="Search words..." class="search-input">
+      </div>
+
+      <div class="words-grid">
+        {% for word_group in words %}
+        {% for word in word_group %}
+        <div class="word-card">{{ word }}</div>
+        {% endfor %}
+        {% endfor %}
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Simple search functionality
+    document.getElementById('wordSearch').addEventListener('input', function (e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const wordCards = document.querySelectorAll('.word-card');
+
+      wordCards.forEach(card => {
+        const word = card.textContent.toLowerCase();
+        card.style.display = word.includes(searchTerm) ? 'flex' : 'none';
+      });
+    });
+  </script>
+</body>
+
+</html>

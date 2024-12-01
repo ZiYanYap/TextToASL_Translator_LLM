@@ -2,3 +2,4 @@ python-dotenv
 huggingface-hub
 Flask
 pymongo
+selenium

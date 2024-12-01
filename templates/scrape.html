@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add a Word</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Add a Word</h1>
+      <nav class="nav-links">
+        <a href="{{ url_for('index') }}" class="nav-button">ASL Translator</a>
+        <a href="{{ url_for('words_list') }}" class="nav-button">View Supported Words</a>
+        <a href="{{ url_for('metadata') }}" class="nav-button active">Add a Word</a>
+      </nav>
+    </header>
+
+    <main class="add-word-container">
+      <!-- Toast Notification -->
+      <div id="toast-container" class="position-fixed top-0 end-0 p-3">
+        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <strong class="me-auto" id="toast-title">Notification</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body" id="toast-message"></div>
+        </div>
+      </div>
+
+      <!-- Custom Word Form -->
+      <form method="POST" class="form-group" id="customWordForm">
+        <div class="form-section">
+          <label for="word_name"><strong>Enter word name (separate multiple names with commas):</strong></label>
+          <input type="text" class="form-control custom-input" name="word_name" placeholder="e.g., have, has, had"
+            required />
+        </div>
+
+        <div id="meanings-container" class="form-section">
+          <div class="meaning-url-group">
+            <div class="row">
+              <div class="col">
+                <input type="text" class="form-control custom-input" name="meanings[]" placeholder="Meaning" />
+              </div>
+              <div class="col">
+                <input type="text" class="form-control custom-input" name="video_urls[]" placeholder="Video URL" />
+              </div>
+              <div class="col-auto">
+                <button type="button" class="btn-remove remove-group">-</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-add" id="add-meaning">+</button>
+          <button type="submit" class="btn-submit"><strong>Add Word</strong></button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      // Show toast notification
+      function showToast(title, message, isError = false) {
+        $('#toast-title').text(title);
+        $('#toast-message').text(message);
+        if (isError) {
+          $('#toast').addClass('toast-error'); // Add error class
+        } else {
+          $('#toast').removeClass('toast-error'); // Remove error class
+        }
+        var toast = new bootstrap.Toast($('#toast'));
+        toast.show();
+      }
+
+      // Check for metadata and error messages
+      {% if metadata %}
+      showToast("Success", {{ metadata | tojson }});
+    {% endif %}
+    {% if error %}
+    showToast("Error", {{ error | tojson }}, true); // Pass true for error
+    {% endif %}
+
+    // Add new meaning and URL input fields
+    $('#add-meaning').click(function () {
+      $('#meanings-container').append(`
+            <div class="meaning-url-group">
+              <div class="row">
+                <div class="col">
+                  <input type="text" class="form-control custom-input" name="meanings[]" placeholder="Meaning" />
+                </div>
+                <div class="col">
+                  <input type="text" class="form-control custom-input" name="video_urls[]" placeholder="Video URL" />
+                </div>
+                <div class="col-auto">
+                  <button type="button" class="btn-remove remove-group">-</button>
+                </div>
+              </div>
+            </div>
+        `);
+    });
+
+    // Remove meaning and URL input fields
+    $(document).on('click', '.remove-group', function () {
+      // Ensure at least one input group remains
+      if ($('#meanings-container .meaning-url-group').length > 1) {
+        $(this).closest('.meaning-url-group').remove();
+      }
+    });
+
+    // Form submission validation
+    $('#customWordForm').on('submit', function (e) {
+      const meaningGroups = $('#meanings-container .meaning-url-group');
+      if (meaningGroups.length > 1) {
+        let allMeaningsFilled = true;
+        meaningGroups.each(function () {
+          const meaningInput = $(this).find('input[name="meanings[]"]');
+          if (!meaningInput.val()) {
+            allMeaningsFilled = false;
+          }
+        });
+        if (!allMeaningsFilled) {
+          e.preventDefault(); // Prevent form submission
+          alert('Please provide a meaning for each entry.');
+        }
+      }
+    });
+    });
+  </script>
+</body>
+
+</html>
