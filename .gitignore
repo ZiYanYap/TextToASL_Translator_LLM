@@ -1,2 +1,4 @@
 .env
 venv
+data/sign_videos
+**/__pycache__
