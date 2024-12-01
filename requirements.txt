@@ -3,3 +3,4 @@ huggingface-hub
 Flask
 pymongo
 selenium
+yt-dlp
