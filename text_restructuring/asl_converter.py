@@ -27,9 +27,9 @@ def convert_to_asl(input_text: str) -> Optional[str]:
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            temperature=0,
-            max_tokens=1024,
-            top_p=0.95,
+            temperature=0.2,
+            max_tokens=50,
+            top_p=0.8,
             stream=False
         )
 
