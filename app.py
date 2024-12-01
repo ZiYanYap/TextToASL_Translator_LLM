@@ -44,8 +44,12 @@ def metadata():
         # Prepare the data for MongoDB
         meanings_data = []
         for meaning, video_url in zip(meanings, video_urls):
-            video_filename = os.path.basename(video_url)
-            video_path = os.path.join(video_save_path, video_filename)
+            if "youtube.com" in video_url or "youtu.be" in video_url:
+                video_filename = video_url.split('/')[-1] if 'youtu.be' in video_url else video_url.split('v=')[-1]
+                video_path = os.path.join(video_save_path, f"{video_filename}.mp4")  # Add .mp4 extension
+            else:
+                video_filename = os.path.basename(video_url)
+                video_path = os.path.join(video_save_path, video_filename)
 
             meanings_data.append({
                 "meaning": meaning,
