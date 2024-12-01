@@ -75,7 +75,11 @@ def words_list():
     # Fetch all words from the MongoDB collection
     words_data = collection.find({}, {"words": 1})  # Only retrieve the 'words' field
     words = [word["words"] for word in words_data]
-    return render_template("words.html", words=words)
+    
+    # Sort the words alphabetically
+    sorted_words = sorted(words, key=lambda x: x[0].lower())  # Sort by the first letter, case insensitive
+    
+    return render_template("words.html", words=sorted_words)
 
 if __name__ == "__main__":
     app.run(debug=True)
