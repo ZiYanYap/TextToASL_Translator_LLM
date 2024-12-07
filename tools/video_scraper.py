@@ -2,8 +2,8 @@ import os
 import requests
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from tqdm import tqdm  # For progress bar
-from concurrent.futures import ThreadPoolExecutor, as_completed  # For concurrency
+from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import yt_dlp
 
 # Load environment variables
@@ -14,6 +14,21 @@ uri = os.getenv("MONGODB_URI")
 client = MongoClient(uri)
 db = client["asl_project"]
 collection = db["word_metadata"]
+
+# Define base path for videos
+BASE_VIDEO_PATH = os.path.join("static", "sign_videos")
+
+def get_video_path(video_url):
+    """
+    Generate the video path based on the video URL
+    """
+    if "youtube.com" in video_url or "youtu.be" in video_url:
+        # Handle YouTube URLs
+        video_filename = video_url.split('/')[-1] if 'youtu.be' in video_url else video_url.split('v=')[-1]
+        return os.path.join(BASE_VIDEO_PATH, f"{video_filename}.mp4")
+    else:
+        # Handle direct video URLs
+        return os.path.join(BASE_VIDEO_PATH, video_url.split('/')[-1])
 
 def download_video(url, save_path):
     """
@@ -43,7 +58,7 @@ def download_video(url, save_path):
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
             response = requests.get(url, headers=headers, stream=True)
-            response.raise_for_status()  # Raise exception for bad status codes
+            response.raise_for_status()
             
             # Get file size for progress bar
             file_size = int(response.headers.get('content-length', 0))
@@ -73,20 +88,21 @@ def scrape_videos():
     futures = []
     
     # Use ThreadPoolExecutor for concurrency
-    with ThreadPoolExecutor(max_workers=5) as executor:  # Adjust max_workers as needed
+    with ThreadPoolExecutor(max_workers=5) as executor:
         for doc in documents:
             for definition in doc.get('definitions', []):
                 video_url = definition.get('video_url')
-                video_path = definition.get('video_path')
                 
-                if video_url and video_path:
+                if video_url:
                     print(f"\nProcessing word(s): {doc['words']}")
+                    # Generate video path
+                    video_path = get_video_path(video_url)
                     # Submit the download task to the executor
                     futures.append(executor.submit(download_video, video_url, video_path))
         
         # Wait for all futures to complete
         for future in as_completed(futures):
-            future.result()  # This will also raise any exceptions that occurred during the download
+            future.result()
 
 if __name__ == "__main__":
     print("Starting video scraping process...")

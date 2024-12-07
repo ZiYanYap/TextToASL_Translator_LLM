@@ -6,6 +6,7 @@ from text_restructuring.asl_converter import convert_to_asl
 from speech_to_text.speech_to_text_converter import record_and_transcribe
 from langdetect import detect
 from multilingual_translation.multilingual_translator import translate_to_english
+from sign_synthesis.video_matcher import prepare_display_data
 
 app = Flask(__name__)
 
@@ -17,9 +18,6 @@ uri = os.getenv("MONGODB_URI")
 client = MongoClient(uri)
 db = client["asl_project"]
 collection = db["word_metadata"]
-
-# Define the video save path
-video_save_path = os.path.join("data", "sign_videos")
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -44,15 +42,20 @@ def index():
             # Generate ASL Gloss from the English text
             asl_translation = convert_to_asl(text_for_asl)
             
+            # Get video paths for each word in the ASL translation
+            video_data = prepare_display_data(asl_translation, context=text_for_asl)
+            
             return render_template("index.html", 
                                  original_text=original_text,
-                                 asl_translation=asl_translation)
+                                 asl_translation=asl_translation,
+                                 video_data=video_data)
         except Exception as e:
             return render_template("index.html", error=f"Error: {str(e)}")
 
     return render_template("index.html", 
                          original_text=None,
-                         asl_translation=None)
+                         asl_translation=None,
+                         video_data=None)
 
 @app.route("/speech-to-text", methods=["POST"])
 def speech_to_text():
@@ -80,17 +83,9 @@ def metadata():
         # Prepare the data for MongoDB
         meanings_data = []
         for meaning, video_url in zip(meanings, video_urls):
-            if "youtube.com" in video_url or "youtu.be" in video_url:
-                video_filename = video_url.split('/')[-1] if 'youtu.be' in video_url else video_url.split('v=')[-1]
-                video_path = os.path.join(video_save_path, f"{video_filename}.mp4")  # Add .mp4 extension
-            else:
-                video_filename = os.path.basename(video_url)
-                video_path = os.path.join(video_save_path, video_filename)
-
             meanings_data.append({
                 "meaning": meaning,
-                "video_url": video_url,
-                "video_path": video_path
+                "video_url": video_url
             })
 
         # Create or update the document for related words

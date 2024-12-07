@@ -726,3 +726,77 @@ input[name="word_name"] {
 .button-group .translate-button {
     flex: 0 1 auto;
 }
+
+/* Video container styles */
+.video-container {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #2d2d2d;
+    border-radius: 10px;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.video-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #1e1e1e;
+    padding: 15px;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.video-item:hover {
+    transform: translateY(-5px);
+}
+
+.video-word {
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #bb86fc;
+}
+
+video {
+    border-radius: 8px;
+    background-color: #000;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Video controls */
+.video-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.control-button {
+    background-color: #bb86fc;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.control-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
+}
+
+.control-button i {
+    font-size: 14px;
+}

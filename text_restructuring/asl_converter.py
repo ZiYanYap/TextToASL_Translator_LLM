@@ -33,7 +33,12 @@ def convert_to_asl(input_text: str) -> Optional[str]:
             stream=False
         )
 
-        return response.choices[0].message.content.strip()
+        # Remove quotes and punctuation from response
+        cleaned_response = response.choices[0].message.content.strip()
+        if cleaned_response.startswith('"') and cleaned_response.endswith('"'):
+            cleaned_response = cleaned_response[1:-1]
+        cleaned_response = cleaned_response.rstrip('.,')
+        return cleaned_response
 
     except Exception as e:
         print(f"Error converting text to ASL: {str(e)}")
