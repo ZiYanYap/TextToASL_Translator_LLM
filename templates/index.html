@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text to ASL Translator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
@@ -22,10 +23,20 @@
 
         <main class="translator-container">
             <form method="POST" class="form-group">
-                <textarea name="input_text" id="input_text" class="translator-input"
-                    placeholder="Type your text here..."
-                    rows="5">{{ original_text if original_text else "" }}</textarea>
-                <button type="submit" class="translate-button"><strong>Convert to ASL</strong></button>
+                <div class="translation-boxes">
+                    <div class="input-group">
+                        <textarea name="input_text" id="input_text" class="translator-input"
+                            placeholder="Type your text in any language..."
+                            rows="5">{{ original_text if original_text else "" }}</textarea>
+                        <button type="button" id="micButton" class="mic-button" title="Click to speak">
+                            <i class="fas fa-microphone"></i>
+                            <div class="loading-spinner"></div>
+                        </button>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="translate-button"><strong>Convert to ASL</strong></button>
+                </div>
             </form>
 
             {% if asl_translation %}
@@ -40,6 +51,73 @@
             {% endif %}
         </main>
     </div>
+
+    <!-- Toast for notifications -->
+    <div class="toast-container">
+        <div id="statusToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toastTitle">Status</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('micButton').addEventListener('click', async function() {
+            const button = this;
+            const textarea = document.getElementById('input_text');
+            const icon = button.querySelector('i');
+            
+            if (button.classList.contains('recording')) {
+                return; // Prevent multiple recordings
+            }
+            
+            button.classList.add('recording');
+            icon.classList.remove('fa-microphone');
+            icon.classList.add('fa-microphone-slash');
+            
+            showToast('Recording...', 'Started recording');
+            
+            try {
+                button.classList.add('processing');
+                
+                const response = await fetch('/speech-to-text', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    textarea.value = textarea.value 
+                        ? textarea.value + ' ' + data.text 
+                        : data.text;
+                } else {
+                    showToast('Error', data.error || 'Failed to transcribe speech', true);
+                }
+            } catch (error) {
+                showToast('Error', error.message, true);
+            } finally {
+                button.classList.remove('recording', 'processing');
+                icon.classList.remove('fa-microphone-slash');
+                icon.classList.add('fa-microphone');
+            }
+        });
+
+        function showToast(title, message, isError = false) {
+            const toast = document.getElementById('statusToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.classList.toggle('toast-error', isError);
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+    </script>
 </body>
 
 </html>
