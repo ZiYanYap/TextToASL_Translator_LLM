@@ -3,6 +3,9 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
 from text_restructuring.asl_converter import convert_to_asl
+from speech_to_text.speech_to_text_converter import record_and_transcribe
+from langdetect import detect
+from multilingual_translation.multilingual_translator import translate_to_english
 
 app = Flask(__name__)
 
@@ -26,13 +29,46 @@ def index():
             return jsonify({"error": "No input text provided"}), 400
 
         try:
-            # Generate ASL Gloss
-            asl_translation = convert_to_asl(original_text)
-            return render_template("index.html", original_text=original_text, asl_translation=asl_translation)
+            # Detect language
+            detected_lang = detect(original_text)
+            print(f"Detected language: {detected_lang}")  # Debugging line
+            
+            # Translate to English if not already in English
+            if detected_lang != 'en':
+                english_text = translate_to_english(original_text)
+                print(f"Translated text: {english_text}")  # Debugging line
+                text_for_asl = english_text
+            else:
+                text_for_asl = original_text
+            
+            # Generate ASL Gloss from the English text
+            asl_translation = convert_to_asl(text_for_asl)
+            
+            return render_template("index.html", 
+                                 original_text=original_text,
+                                 asl_translation=asl_translation)
         except Exception as e:
             return render_template("index.html", error=f"Error: {str(e)}")
 
-    return render_template("index.html", original_text=None, asl_translation=None)
+    return render_template("index.html", 
+                         original_text=None,
+                         asl_translation=None)
+
+@app.route("/speech-to-text", methods=["POST"])
+def speech_to_text():
+    try:
+        # Call the record_and_transcribe function
+        transcription = record_and_transcribe()
+        
+        if not transcription:
+            return jsonify({"success": False, "error": "No speech detected"}), 400
+            
+        return jsonify({
+            "success": True,
+            "text": transcription
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/scrape", methods=["GET", "POST"])
 def metadata():

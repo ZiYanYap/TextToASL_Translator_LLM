@@ -540,3 +540,189 @@ input[name="word_name"] {
     font-weight: 500;
     opacity: 0.9;
 }
+
+/* Input group styling */
+.input-group {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Microphone button styling */
+.mic-button {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.mic-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.mic-button.recording {
+    background-color: #cf6679;
+    animation: pulse 1.5s infinite;
+}
+
+.mic-button.processing {
+    background-color: #bb86fc;
+    animation: none;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #000000;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+.mic-button.processing .loading-spinner {
+    display: block;
+}
+
+.mic-button.processing i {
+    display: none;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(207, 102, 121, 0.7);
+    }
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 10px rgba(207, 102, 121, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(207, 102, 121, 0);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Toast styling */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1055;
+}
+
+.toast {
+    background-color: #333;
+    color: white;
+    min-width: 250px;
+}
+
+.toast-header {
+    background-color: #bb86fc;
+    color: #000000;
+}
+
+.toast.toast-error .toast-header {
+    background-color: #cf6679;
+    color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mic-button {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .toast-container {
+        right: 10px;
+        left: 10px;
+    }
+    
+    .toast {
+        width: 100%;
+    }
+}
+
+/* Update the translation boxes layout */
+.translation-boxes {
+    display: flex;
+    flex-direction: row;  /* Ensure horizontal layout */
+    gap: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.translation-boxes .input-group {
+    flex: 1;
+    position: relative;  /* For positioning the mic button */
+    width: 50%;  /* Each box takes half the width */
+}
+
+/* Update microphone button positioning */
+.mic-button {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+/* Ensure textareas take full width of their containers */
+.translator-input {
+    width: 100%;
+    height: 100%;
+    padding-right: 50px;  /* Make space for the mic button */
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    .translation-boxes {
+        flex-direction: column;
+    }
+    
+    .translation-boxes .input-group {
+        width: 100%;
+    }
+}
+
+.button-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.button-group .translate-button {
+    flex: 0 1 auto;
+}
