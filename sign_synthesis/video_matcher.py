@@ -76,11 +76,13 @@ def get_word_video_mapping(word, context=None):
             if len(definitions) > 1 and context:
                 # Prepare descriptions for LLM more concisely
                 descriptions = [f"{i + 1}. {d.get('meaning')}" for i, d in enumerate(definitions)]
+
                 prompt = (
-                    f'Which description describes the word "{w.upper()}" best in the following context?\n\n'
+                    f'Which definition of the word "{w.upper()}" is most appropriate in the context of the phrase "{context}"?\n\n'
                     f'Descriptions:\n{", ".join(descriptions)}\n\n'
-                    f'Context: "{context}".\n\nAnswer (1 or 2):'
+                    f'Please choose the best definition (1 or 2).'
                 )
+                print(f"Resolving ambiguity for {w}")
                 response = query_llm(prompt)
                 try:
                     selected_index = int(response.strip()) - 1  # Subtract 1 to convert to 0-based index
