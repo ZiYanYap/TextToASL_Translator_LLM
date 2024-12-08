@@ -50,7 +50,7 @@
                     <h3>Sign Language Video</h3>
                     <div class="merged-video-container">
                         <div class="current-word"></div>
-                        <video id="mergedVideo" width="400" height="360" controls>
+                        <video id="mergedVideo" width="400" height="360" nocontrol autoplay muted>
                             <source src="{{ url_for('static', filename='temp/merged_video.mp4') }}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
