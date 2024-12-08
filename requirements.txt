@@ -4,8 +4,8 @@ Flask
 pymongo
 selenium
 yt-dlp
-langdetect
 sounddevice
 soundfile
 numpy
 moviepy
+translators

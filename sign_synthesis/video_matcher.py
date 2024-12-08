@@ -161,7 +161,8 @@ def prepare_display_data(asl_translation, context=None):
     
     display_data = []
     for word in asl_translation.split():
-        display_data.extend(get_word_video_mapping(word, context=context))
+        word_mapping = get_word_video_mapping(word, context=context)
+        display_data.extend(word_mapping)
     
     # Get video paths and merge them
     video_paths = [os.path.join('static', path.replace('static\\', '').replace('\\', '/')) 
