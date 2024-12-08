@@ -42,13 +42,14 @@ def index():
             # Generate ASL Gloss from the English text
             asl_translation = convert_to_asl(text_for_asl)
             
-            # Get video paths for each word in the ASL translation
-            video_data = prepare_display_data(asl_translation, context=text_for_asl)
+            # Get video paths and merged video
+            video_data, merged_video_path = prepare_display_data(asl_translation, context=text_for_asl)
             
             return render_template("index.html", 
                                  original_text=original_text,
                                  asl_translation=asl_translation,
                                  video_data=video_data)
+                                 
         except Exception as e:
             return render_template("index.html", error=f"Error: {str(e)}")
 

@@ -47,28 +47,24 @@
                 <!-- Add this new section for videos -->
                 {% if video_data %}
                 <div class="video-container">
-                    <h3>Sign Language Videos</h3>
-                    <div class="video-grid">
-                        {% for word, video_path in video_data %}
-                        <div class="video-item">
-                            <p class="video-word">{{ word }}</p>
-                            <video width="200" height="200" controls preload="none">
-                                <source src="{{ url_for('static', filename=video_path.replace('static\\', '').replace('\\', '/')) }}" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                        {% endfor %}
+                    <h3>Sign Language Video</h3>
+                    <div class="merged-video-container">
+                        <div class="current-word"></div>
+                        <video id="mergedVideo" width="400" height="360" controls>
+                            <source src="{{ url_for('static', filename='temp/merged_video.mp4') }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
                     </div>
                     
                     <!-- Video Controls -->
                     <div class="video-controls">
-                        <button id="playAllBtn" class="control-button">
-                            <i class="fas fa-play"></i> Play All
+                        <button id="playBtn" class="control-button">
+                            <i class="fas fa-play"></i> Play
                         </button>
-                        <button id="pauseAllBtn" class="control-button">
-                            <i class="fas fa-pause"></i> Pause All
+                        <button id="pauseBtn" class="control-button">
+                            <i class="fas fa-pause"></i> Pause
                         </button>
-                        <button id="restartAllBtn" class="control-button">
+                        <button id="restartBtn" class="control-button">
                             <i class="fas fa-redo"></i> Restart
                         </button>
                     </div>
@@ -152,60 +148,29 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const videos = document.querySelectorAll('video');
-        const playAllBtn = document.getElementById('playAllBtn');
-        const pauseAllBtn = document.getElementById('pauseAllBtn');
-        const restartAllBtn = document.getElementById('restartAllBtn');
+        const video = document.getElementById('mergedVideo');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const currentWordDiv = document.querySelector('.current-word');
+        
+        if (video) {
+            // Play button
+            playBtn.addEventListener('click', () => {
+                video.play();
+            });
 
-        // Play videos sequentially
-        async function playVideosSequentially() {
-            for (const video of videos) {
-                try {
-                    video.currentTime = 0;
-                    await video.play();
-                    await new Promise(resolve => {
-                        video.onended = resolve;
-                    });
-                } catch (error) {
-                    console.error('Error playing video:', error);
-                }
-            }
-        }
-
-        // Play all videos
-        playAllBtn.addEventListener('click', () => {
-            playVideosSequentially();
-        });
-
-        // Pause all videos
-        pauseAllBtn.addEventListener('click', () => {
-            videos.forEach(video => video.pause());
-        });
-
-        // Restart all videos
-        restartAllBtn.addEventListener('click', () => {
-            videos.forEach(video => {
-                video.currentTime = 0;
+            // Pause button
+            pauseBtn.addEventListener('click', () => {
                 video.pause();
             });
-            playVideosSequentially();
-        });
 
-        // Add ended event listener to each video
-        videos.forEach(video => {
-            video.addEventListener('ended', function() {
-                // Find the next video in the sequence
-                const currentVideoItem = this.closest('.video-item');
-                const nextVideoItem = currentVideoItem.nextElementSibling;
-                
-                if (nextVideoItem) {
-                    const nextVideo = nextVideoItem.querySelector('video');
-                    if (nextVideo) {
-                        nextVideo.play();
-                    }
-                }
+            // Restart button
+            restartBtn.addEventListener('click', () => {
+                video.currentTime = 0;
+                video.play();
             });
-        });
+        }
     });
     </script>
 </body>

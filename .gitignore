@@ -1,4 +1,5 @@
 .env
 venv
 static/sign_videos
+static/temp
 **/__pycache__
