@@ -47,7 +47,6 @@ def record_and_transcribe():
     """
     try:
         # Record audio
-        print("Recording...")
         audio_data = sd.rec(
             int(SAMPLE_RATE * DURATION),
             samplerate=SAMPLE_RATE,
@@ -55,14 +54,12 @@ def record_and_transcribe():
             dtype='float32'
         )
         sd.wait()  # Wait until recording is finished
-        print("Recording complete.")
 
         # Normalize audio data
         audio_data = np.squeeze(audio_data)  # Remove extra dimension if present
         
         # Check if there's actual audio content
         audio_level = np.abs(audio_data).mean()
-        print(f"Audio level: {audio_level}")
         
         if audio_level < 0.001:  # Adjust this threshold as needed
             print("Audio level too low")
@@ -83,7 +80,6 @@ def record_and_transcribe():
             # Extract text from response
             if isinstance(result, dict) and 'text' in result:
                 transcription = result['text'].strip()
-                print(f"Transcription: {transcription}")
                 return transcription
             else:
                 print(f"Unexpected API response: {result}")
@@ -103,9 +99,3 @@ def record_and_transcribe():
     except Exception as e:
         print(f"Recording error: {e}")
         return ""
-
-if __name__ == "__main__":
-    # Test the function
-    text = record_and_transcribe()
-    print(f"Final transcription: {text}")
-

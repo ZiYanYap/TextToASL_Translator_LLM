@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import os
 from text_restructuring.asl_converter import convert_to_asl
 from speech_to_text.speech_to_text_converter import record_and_transcribe
-from langdetect import detect
 from multilingual_translation.multilingual_translator import translate_to_english
 from sign_synthesis.video_matcher import prepare_display_data
 
@@ -27,23 +26,15 @@ def index():
             return jsonify({"error": "No input text provided"}), 400
 
         try:
-            # Detect language
-            detected_lang = detect(original_text)
-            print(f"Detected language: {detected_lang}")  # Debugging line
-            
-            # Translate to English if not already in English
-            if detected_lang != 'en':
-                english_text = translate_to_english(original_text)
-                print(f"Translated text: {english_text}")  # Debugging line
-                text_for_asl = english_text
-            else:
-                text_for_asl = original_text
+            # Translate to English
+            english_text = translate_to_english(original_text)
+            print(f"Translated text: {english_text}")  # Debugging line
             
             # Generate ASL Gloss from the English text
-            asl_translation = convert_to_asl(text_for_asl)
+            asl_translation = convert_to_asl(english_text)
             
             # Get video paths and merged video
-            video_data, merged_video_path = prepare_display_data(asl_translation, context=text_for_asl)
+            video_data, merged_video_path = prepare_display_data(asl_translation, context=english_text)
             
             return render_template("index.html", 
                                  original_text=original_text,
