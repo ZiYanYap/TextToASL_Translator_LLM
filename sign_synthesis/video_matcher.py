@@ -2,6 +2,7 @@ import os
 import requests
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from moviepy import VideoFileClip, concatenate_videoclips
 
 # Load environment variables
 load_dotenv()
@@ -113,15 +114,58 @@ def get_word_video_mapping(word, context=None):
 
     return word_video_map
 
+def merge_videos(video_paths):
+    """
+    Merge multiple video files into a single video file.
+    Args:
+        video_paths (list): List of paths to video files to merge
+    Returns:
+        str: Path to the merged video file
+    """
+    clips = []
+    for path in video_paths:
+        # Explicitly set the video size and ensure proper loading
+        clip = VideoFileClip(path, target_resolution=(480, 360))
+        clips.append(clip)
+    
+    final_clip = concatenate_videoclips(clips, method="compose")
+    
+    # Create temp directory if it doesn't exist
+    temp_dir = os.path.join('static', 'temp')
+    os.makedirs(temp_dir, exist_ok=True)
+    
+    # Save merged video with specific codec settings
+    output_path = os.path.join(temp_dir, 'merged_video.mp4')
+    final_clip.write_videofile(output_path, 
+                             codec='libx264', 
+                             audio_codec='aac',
+                             preset='medium',
+                             fps=30)
+    
+    # Close all clips
+    for clip in clips:
+        clip.close()
+    final_clip.close()
+    
+    return output_path
+
 def prepare_display_data(asl_translation, context=None):
     """
     Prepare the display data by matching the ASL translation words with their video paths.
-    Returns a list of tuples containing (word, video_path).
+    Returns a tuple containing:
+        - List of tuples (word, video_path)
+        - Path to merged video
     """
     if not asl_translation:
-        return []
+        return [], None
     
     display_data = []
     for word in asl_translation.split():
         display_data.extend(get_word_video_mapping(word, context=context))
-    return display_data
+    
+    # Get video paths and merge them
+    video_paths = [os.path.join('static', path.replace('static\\', '').replace('\\', '/')) 
+                  for _, path in display_data]
+    merged_video_path = merge_videos(video_paths)
+    
+    return display_data, merged_video_path

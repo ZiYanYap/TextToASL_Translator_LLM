@@ -5,11 +5,25 @@
     box-sizing: border-box;
 }
 
+/* Add CSS custom properties for consistent theming */
+:root {
+    --primary-color: #bb86fc;
+    --background-dark: #121212;
+    --surface-dark: #1e1e1e;
+    --input-dark: #2d2d2d;
+    --error-color: #cf6679;
+    --text-light: #ffffff;
+    --border-radius-lg: 15px;
+    --border-radius-md: 10px;
+    --border-radius-sm: 8px;
+    --transition-standard: all 0.3s ease;
+}
+
 /* General body styling */
 body {
     font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: #ffffff;
+    background-color: var(--background-dark);
+    color: var(--text-light);
     margin: 0;
     padding: 20px 0;
     min-height: 100vh;
@@ -24,9 +38,9 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background: #1e1e1e;
+    background: var(--surface-dark);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    border-radius: 15px;
+    border-radius: var(--border-radius-lg);
     width: 90%;
     margin-bottom: 20px;
 }
@@ -34,7 +48,7 @@ body {
 /* Heading styling */
 h1 {
     font-size: 24px;
-    color: #ffffff;
+    color: var(--text-light);
     text-align: center;
     margin-bottom: 20px;
 }
@@ -54,11 +68,11 @@ textarea,
 .search-input {
     padding: 12px 15px;
     border: 2px solid #444;
-    border-radius: 10px;
-    background-color: #2d2d2d;
-    color: #ffffff;
+    border-radius: var(--border-radius-md);
+    background-color: var(--input-dark);
+    color: var(--text-light);
     width: 100%;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
 }
 
 /* Focus states for all inputs */
@@ -67,7 +81,7 @@ textarea:focus,
 .custom-input:focus,
 .translator-input:focus,
 .search-input:focus {
-    border-color: #bb86fc;
+    border-color: var(--primary-color);
     box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
     outline: none;
 }
@@ -77,7 +91,7 @@ input[name="word_name"] {
     width: 60%;
     margin: 0 auto;
     display: block;
-    border-radius: 8px;
+    border-radius: var(--border-radius-sm);
 }
 
 .search-input {
@@ -98,7 +112,7 @@ input[name="word_name"] {
 
 .form-section label {
     font-size: 16px;
-    color: #bb86fc;
+    color: var(--primary-color);
     margin-bottom: 5px;
     display: block;
     text-align: center;
@@ -107,8 +121,8 @@ input[name="word_name"] {
 .meaning-url-group {
     margin-bottom: 15px;
     padding: 15px;
-    background-color: #2d2d2d;
-    border-radius: 10px;
+    background-color: var(--input-dark);
+    border-radius: var(--border-radius-md);
 }
 
 /* Button Styles */
@@ -118,7 +132,7 @@ input[name="word_name"] {
 .translate-button {
     border: none;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
 }
 
 .btn-add,
@@ -134,7 +148,7 @@ input[name="word_name"] {
 
 .btn-submit,
 .translate-button {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000000;
     padding: 12px 30px;
     border-radius: 25px;
@@ -142,25 +156,25 @@ input[name="word_name"] {
 }
 
 .btn-add {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000000;
 }
 
 .btn-remove {
-    background-color: #cf6679;
-    color: #ffffff;
+    background-color: var(--error-color);
+    color: var(--text-light);
 }
 
 /* Button Hover States */
 .btn-add:hover,
 .btn-submit:hover,
 .translate-button:hover {
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
     box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
 }
 
 .btn-remove:hover {
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
     box-shadow: 0 5px 15px rgba(207, 102, 121, 0.3);
 }
 
@@ -176,21 +190,21 @@ input[name="word_name"] {
     margin-top: 20px;
     padding: 15px;
     border: 1px solid #444;
-    border-radius: 10px;
-    background-color: #1e1e1e;
-    color: #ffffff;
+    border-radius: var(--border-radius-md);
+    background-color: var(--surface-dark);
+    color: var(--text-light);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .output h2 {
     font-size: 20px;
     margin-bottom: 10px;
-    color: #ffffff;
+    color: var(--text-light);
 }
 
 .output p {
     font-size: 18px;
-    color: #ffffff;
+    color: var(--text-light);
     background-color: #333;
     padding: 10px;
     border-radius: 5px;
@@ -199,7 +213,7 @@ input[name="word_name"] {
 /* Error message */
 .error {
     background-color: #424242;
-    color: #ffffff;
+    color: var(--text-light);
     text-align: center;
     font-size: 16px;
     font-weight: bold;
@@ -218,7 +232,7 @@ header {
 nav a {
     margin: 0 15px;
     text-decoration: none;
-    color: #ffffff;
+    color: var(--text-light);
     font-weight: bold;
 }
 
@@ -244,7 +258,7 @@ nav a:hover {
 .toast {
     min-width: 350px;
     max-width: 450px;
-    border-radius: 10px;
+    border-radius: var(--border-radius-md);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     transition: opacity 0.5s ease;
 }
@@ -253,8 +267,8 @@ nav a:hover {
     background-color: #28a745;
     color: white;
     font-weight: bold;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border-top-left-radius: var(--border-radius-md);
+    border-top-right-radius: var(--border-radius-md);
 }
 
 .toast-body {
@@ -262,8 +276,8 @@ nav a:hover {
     color: #333;
     font-size: 16px;
     padding: 10px;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: var(--border-radius-md);
+    border-bottom-right-radius: var(--border-radius-md);
 }
 
 /* Error toast styling */
@@ -287,19 +301,19 @@ nav a:hover {
     background-color: #333;
     padding: 10px 20px;
     border-radius: 25px;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
     text-decoration: none;
-    color: #ffffff;
+    color: var(--text-light);
 }
 
 .nav-button:hover {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000000;
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
 }
 
 .nav-button.active {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000000;
 }
 
@@ -318,14 +332,14 @@ nav a:hover {
     padding: 12px 20px;
     border-radius: 25px;
     border: 2px solid #333;
-    background-color: #2d2d2d;
-    color: #ffffff;
+    background-color: var(--input-dark);
+    color: var(--text-light);
     font-size: 16px;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
 }
 
 .search-input:focus {
-    border-color: #bb86fc;
+    border-color: var(--primary-color);
     box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
     outline: none;
 }
@@ -341,10 +355,10 @@ nav a:hover {
 .word-card {
     background-color: #333;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: var(--border-radius-md);
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -355,9 +369,9 @@ nav a:hover {
 }
 
 .word-card:hover {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000000;
-    transform: translateY(-3px);
+    transform: translate3d(0, -3px, 0);
     box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
 }
 
@@ -386,35 +400,35 @@ nav a:hover {
 .translator-input {
     width: 100%;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: var(--border-radius-md);
     border: 2px solid #333;
-    background-color: #2d2d2d;
-    color: #ffffff;
+    background-color: var(--input-dark);
+    color: var(--text-light);
     font-size: 16px;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
     margin-bottom: 20px;
     resize: vertical;
 }
 
 .translator-input:focus {
-    border-color: #bb86fc;
+    border-color: var(--primary-color);
     box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
     outline: none;
 }
 
 .translate-button {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000000;
     padding: 12px 30px;
     border: none;
     border-radius: 25px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
 }
 
 .translate-button:hover {
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
     box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
 }
 
@@ -433,16 +447,16 @@ nav a:hover {
 }
 
 .custom-input {
-    background-color: #2d2d2d;
+    background-color: var(--input-dark);
     border: 2px solid #333;
-    color: #ffffff;
-    border-radius: 10px;
+    color: var(--text-light);
+    border-radius: var(--border-radius-md);
     padding: 12px 15px;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
 }
 
 .custom-input:focus {
-    border-color: #bb86fc;
+    border-color: var(--primary-color);
     box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
     outline: none;
 }
@@ -458,39 +472,39 @@ nav a:hover {
     justify-content: center;
     font-size: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
 }
 
 .btn-add {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000000;
 }
 
 .btn-remove {
-    background-color: #cf6679;
-    color: #ffffff;
+    background-color: var(--error-color);
+    color: var(--text-light);
 }
 
 .btn-submit {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000000;
     padding: 12px 30px;
     border: none;
     border-radius: 25px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
     margin-left: 15px;
 }
 
 .btn-add:hover,
 .btn-submit:hover {
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
     box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
 }
 
 .btn-remove:hover {
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
     box-shadow: 0 5px 15px rgba(207, 102, 121, 0.3);
 }
 
@@ -502,8 +516,8 @@ nav a:hover {
 .meaning-url-group {
     margin-bottom: 15px;
     padding: 15px;
-    background-color: #2d2d2d;
-    border-radius: 10px;
+    background-color: var(--input-dark);
+    border-radius: var(--border-radius-md);
 }
 
 .row {
@@ -513,7 +527,7 @@ nav a:hover {
 /* Update for word name input and label */
 .form-section label {
     font-size: 16px;
-    color: #bb86fc;
+    color: var(--primary-color);
     margin-bottom: 5px;
     display: block;
     text-align: center;
@@ -525,15 +539,15 @@ input[name="word_name"] {
     display: block;
     padding: 12px;
     border: 2px solid #444;
-    border-radius: 8px;
-    background-color: #2d2d2d;
-    color: #ffffff;
+    border-radius: var(--border-radius-sm);
+    background-color: var(--input-dark);
+    color: var(--text-light);
     transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 /* Word count styling */
 .word-count {
-    color: #bb86fc;
+    color: var(--primary-color);
     font-size: 16px;
     margin-bottom: 15px;
     text-align: center;
@@ -554,7 +568,7 @@ input[name="word_name"] {
     right: 10px;
     bottom: 10px;
     background-color: transparent;
-    color: #ffffff;
+    color: var(--text-light);
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -563,7 +577,7 @@ input[name="word_name"] {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
     z-index: 2;
 }
 
@@ -573,12 +587,12 @@ input[name="word_name"] {
 }
 
 .mic-button.recording {
-    background-color: #cf6679;
+    background-color: var(--error-color);
     animation: pulse 1.5s infinite;
 }
 
 .mic-button.processing {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     animation: none;
 }
 
@@ -638,12 +652,12 @@ input[name="word_name"] {
 }
 
 .toast-header {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000000;
 }
 
 .toast.toast-error .toast-header {
-    background-color: #cf6679;
+    background-color: var(--error-color);
     color: white;
 }
 
@@ -685,7 +699,7 @@ input[name="word_name"] {
     right: 10px;
     bottom: 10px;
     background-color: transparent;
-    color: #ffffff;
+    color: var(--text-light);
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -694,7 +708,7 @@ input[name="word_name"] {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
     z-index: 2;
 }
 
@@ -731,40 +745,14 @@ input[name="word_name"] {
 .video-container {
     margin-top: 30px;
     padding: 20px;
-    background-color: #2d2d2d;
-    border-radius: 10px;
-}
-
-.video-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.video-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #1e1e1e;
-    padding: 15px;
-    border-radius: 8px;
-    transition: transform 0.3s ease;
-}
-
-.video-item:hover {
-    transform: translateY(-5px);
-}
-
-.video-word {
-    margin-bottom: 10px;
-    font-size: 16px;
-    font-weight: 500;
-    color: #bb86fc;
+    background-color: var(--input-dark);
+    border-radius: var(--border-radius-md);
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
 video {
-    border-radius: 8px;
+    border-radius: var(--border-radius-sm);
     background-color: #000;
     max-width: 100%;
     height: auto;
@@ -779,7 +767,7 @@ video {
 }
 
 .control-button {
-    background-color: #bb86fc;
+    background-color: var(--primary-color);
     color: #000;
     border: none;
     padding: 10px 20px;
@@ -789,14 +777,93 @@ video {
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
 }
 
 .control-button:hover {
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
     box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
 }
 
 .control-button i {
     font-size: 14px;
+}
+
+/* Add these styles */
+.merged-video-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.current-word {
+    font-size: 24px;
+    color: var(--primary-color);
+    font-weight: bold;
+    min-height: 36px;
+    text-align: center;
+}
+
+#mergedVideo {
+    border-radius: 12px;
+    background-color: #000;
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Add smooth scrolling for better UX */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Add focus-visible for better accessibility */
+.nav-button:focus-visible,
+.translator-input:focus-visible,
+.control-button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Add prefers-reduced-motion media query */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Add dark mode support */
+@media (prefers-color-scheme: light) {
+    :root {
+        --background-dark: #f5f5f5;
+        --surface-dark: #ffffff;
+        --input-dark: #e0e0e0;
+        --text-light: #000000;
+    }
+}
+
+/* Improve loading spinner performance */
+.loading-spinner {
+    will-change: transform;
+}
+
+/* Add container query for more responsive layouts */
+@container (min-width: 600px) {
+    .translation-boxes {
+        flex-direction: row;
+    }
+}
+
+/* Add better touch targets for mobile */
+@media (hover: none) {
+    .control-button,
+    .nav-button {
+        min-height: 44px;
+        min-width: 44px;
+    }
 }
