@@ -89,64 +89,12 @@ def draw_wrist_connection(image, pose_wrist, hand_wrist):
 
 def pose_extraction(video_path='static/temp/merged_video.mp4', output_path='static/temp/output_video.mp4'):
     # Initialize MediaPipe Holistic
-    mp_holistic = mp.solutions.holistic
-    DRAW_COLOR = (48, 255, 48)
-    IGNORED_POSE_LANDMARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21, 22]
-    
-    custom_pose_connections = [
-        connection for connection in mp_holistic.POSE_CONNECTIONS
-        if connection[0] not in IGNORED_POSE_LANDMARKS and connection[1] not in IGNORED_POSE_LANDMARKS
-    ]
+    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+        cap = cv2.VideoCapture(video_path)
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
+        out = cv2.VideoWriter(output_path, fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
 
-    def mediapipe_detection(image, model):
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image_rgb.flags.writeable = False
-        results = model.process(image_rgb)
-        image.flags.writeable = True
-        return cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR), results
-
-    def draw_styled_landmarks(image, results):
-        mask = np.zeros_like(image)
-        if results.face_landmarks:
-            mp_drawing.draw_landmarks(
-                mask,
-                results.face_landmarks,
-                mp_holistic.FACEMESH_CONTOURS,
-                None,
-                mp_drawing.DrawingSpec(color=DRAW_COLOR, thickness=2, circle_radius=2)
-            )
-        if results.pose_landmarks:
-            mp_drawing.draw_landmarks(
-                mask,
-                results.pose_landmarks,
-                custom_pose_connections,
-                None,
-                mp_drawing.DrawingSpec(color=DRAW_COLOR, thickness=2, circle_radius=2)
-            )
-        if results.left_hand_landmarks:
-            mp_drawing.draw_landmarks(
-                mask,
-                results.left_hand_landmarks,
-                mp_holistic.HAND_CONNECTIONS,
-                None,
-                mp_drawing.DrawingSpec(color=DRAW_COLOR, thickness=2, circle_radius=2)
-            )
-        if results.right_hand_landmarks:
-            mp_drawing.draw_landmarks(
-                mask,
-                results.right_hand_landmarks,
-                mp_holistic.HAND_CONNECTIONS,
-                None,
-                mp_drawing.DrawingSpec(color=DRAW_COLOR, thickness=2, circle_radius=2)
-            )
-        return mask
-
-    cap = cv2.VideoCapture(video_path)
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')
-    out = cv2.VideoWriter(output_path, fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
-
-    try:
-        with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+        try:
             while cap.isOpened():
                 ret, frame = cap.read()
                 if not ret:
@@ -156,12 +104,12 @@ def pose_extraction(video_path='static/temp/merged_video.mp4', output_path='stat
                 mask = draw_styled_landmarks(image, results)
                 out.write(mask)
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
-        cap.release()
-        out.release()
-        cv2.destroyAllWindows()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        finally:
+            cap.release()
+            out.release()
+            cv2.destroyAllWindows()
 
     return output_path  # Return the path to the processed video
 
