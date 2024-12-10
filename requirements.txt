@@ -2,7 +2,6 @@ python-dotenv
 huggingface-hub
 Flask
 pymongo
-selenium
 yt-dlp
 sounddevice
 soundfile
