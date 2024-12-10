@@ -806,7 +806,7 @@ video {
     text-align: center;
 }
 
-#mergedVideo {
+#mergedVideo, #mergedVideo2 {
     border-radius: 12px;
     background-color: #000;
     max-width: 100%;

@@ -9,3 +9,5 @@ soundfile
 numpy
 moviepy
 translators
+mediapipe
+opencv-python

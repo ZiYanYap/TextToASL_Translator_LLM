@@ -50,8 +50,12 @@
                     <h3>Sign Language Video</h3>
                     <div class="merged-video-container">
                         <div class="current-word"></div>
-                        <video id="mergedVideo" width="400" height="360" nocontrol autoplay muted>
-                            <source src="{{ url_for('static', filename='temp/merged_video.mp4') }}" type="video/mp4">
+                        <video id="mergedVideo" width="400" height="360" nocontrol muted>
+                            <source src="{{ url_for('static', filename='temp/merged_video.mp4') }}?v={{ current_time }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <video id="mergedVideo2" width="400" height="360" nocontrol muted>
+                            <source src="{{ url_for('static', filename='temp/output_video.mp4') }}?v={{ current_time }}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     </div>
@@ -148,27 +152,28 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const video = document.getElementById('mergedVideo');
+        const videos = document.querySelectorAll('video'); // Select all video elements
         const playBtn = document.getElementById('playBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const restartBtn = document.getElementById('restartBtn');
-        const currentWordDiv = document.querySelector('.current-word');
         
-        if (video) {
+        if (videos.length > 0) {
             // Play button
             playBtn.addEventListener('click', () => {
-                video.play();
+                videos.forEach(video => video.play()); // Play all videos
             });
 
             // Pause button
             pauseBtn.addEventListener('click', () => {
-                video.pause();
+                videos.forEach(video => video.pause()); // Pause all videos
             });
 
             // Restart button
             restartBtn.addEventListener('click', () => {
-                video.currentTime = 0;
-                video.play();
+                videos.forEach(video => {
+                    video.currentTime = 0; // Reset time for each video
+                    video.play(); // Play each video
+                });
             });
         }
     });
