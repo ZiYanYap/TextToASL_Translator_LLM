@@ -6,7 +6,7 @@ from text_restructuring.asl_converter import convert_to_asl
 from speech_to_text.speech_to_text_converter import record_and_transcribe
 from multilingual_translation.multilingual_translator import translate_to_english
 from sign_synthesis.video_matcher import prepare_display_data
-from pose_extraction_test import pose_extraction
+from sign_synthesis.pose_extraction import pose_extraction
 import time
 
 app = Flask(__name__)
