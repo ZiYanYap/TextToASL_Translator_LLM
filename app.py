@@ -6,6 +6,8 @@ from text_restructuring.asl_converter import convert_to_asl
 from speech_to_text.speech_to_text_converter import record_and_transcribe
 from multilingual_translation.multilingual_translator import translate_to_english
 from sign_synthesis.video_matcher import prepare_display_data
+from pose_extraction_test import pose_extraction
+import time
 
 app = Flask(__name__)
 
@@ -35,11 +37,14 @@ def index():
             
             # Get video paths and merged video
             video_data, merged_video_path = prepare_display_data(asl_translation, context=english_text)
-            
+            pose_extraction()
+
+            current_time = int(time.time())  # Get current timestamp
             return render_template("index.html", 
                                  original_text=original_text,
                                  asl_translation=asl_translation,
-                                 video_data=video_data)
+                                 video_data=video_data,
+                                 current_time=current_time)
                                  
         except Exception as e:
             return render_template("index.html", error=f"Error: {str(e)}")
