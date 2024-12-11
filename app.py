@@ -20,39 +20,36 @@ client = MongoClient(uri)
 db = client["asl_project"]
 collection = db["word_metadata"]
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        original_text = request.form.get("input_text")
-        if not original_text:
-            return jsonify({"error": "No input text provided"}), 400
+@app.route("/", methods=["GET"])
+def index_get():
+    # Render the index page with initial values
+    return render_template("index.html", original_text=None, asl_translation=None, video_data=None)
 
-        try:
-            # Translate to English
-            english_text = translate_to_english(original_text)
-            print(f"Translated text: {english_text}")  # Debugging line
-            
-            # Generate ASL Gloss from the English text
-            asl_translation = convert_to_asl(english_text)
-            
-            # Get video paths and merged video
-            video_data, merged_video_path = prepare_display_data(asl_translation, context=english_text)
-            pose_extraction()
+@app.route("/", methods=["POST"])
+def index_post():
+    original_text = request.form.get("input_text")
+    if not original_text:
+        return jsonify({"error": "No input text provided"}), 400
+    try:
+        # Translate to English
+        english_text = translate_to_english(original_text)
+        print(f"Translated text: {english_text}")  # Debugging line
+        
+        # Generate ASL Gloss from the English text
+        asl_translation = convert_to_asl(english_text)
+        
+        # Get video paths and merged video
+        video_data, merged_video_path = prepare_display_data(asl_translation, context=english_text)
+        pose_extraction()
 
-            current_time = int(time.time())  # Get current timestamp
-            return render_template("index.html", 
-                                 original_text=original_text,
-                                 asl_translation=asl_translation,
-                                 video_data=video_data,
-                                 current_time=current_time)
-                                 
-        except Exception as e:
-            return render_template("index.html", error=f"Error: {str(e)}")
-
-    return render_template("index.html", 
-                         original_text=None,
-                         asl_translation=None,
-                         video_data=None)
+        current_time = int(time.time())  # Get current timestamp
+        return render_template("index.html", 
+                                original_text=original_text,
+                                asl_translation=asl_translation,
+                                video_data=video_data,
+                                current_time=current_time)
+    except Exception as e:
+        return render_template("index.html", error=f"Error: {str(e)}")
 
 @app.route("/speech-to-text", methods=["POST"])
 def speech_to_text():
@@ -112,6 +109,10 @@ def words_list():
     sorted_words = sorted(words, key=lambda x: x[0].lower())  # Sort by the first letter, case insensitive
     
     return render_template("words.html", words=sorted_words)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return "Page not found!", 404
 
 if __name__ == "__main__":
     app.run(debug=True)
