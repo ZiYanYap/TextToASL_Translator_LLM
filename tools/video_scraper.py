@@ -89,6 +89,9 @@ def scrape_videos():
     
     # Use ThreadPoolExecutor for concurrency
     with ThreadPoolExecutor(max_workers=5) as executor:
+        # Set to hold current video paths
+        current_video_paths = set()
+        
         for doc in documents:
             for definition in doc.get('definitions', []):
                 video_url = definition.get('video_url')
@@ -97,12 +100,21 @@ def scrape_videos():
                     print(f"\nProcessing word(s): {doc['words']}")
                     # Generate video path
                     video_path = get_video_path(video_url)
+                    current_video_paths.add(video_path)  # Add to current paths
                     # Submit the download task to the executor
                     futures.append(executor.submit(download_video, video_url, video_path))
         
         # Wait for all futures to complete
         for future in as_completed(futures):
             future.result()
+    
+    # Delete videos that are no longer in the database
+    existing_videos = set(os.path.join(BASE_VIDEO_PATH, f) for f in os.listdir(BASE_VIDEO_PATH) if f.endswith('.mp4'))
+    videos_to_delete = existing_videos - current_video_paths
+    
+    for video in videos_to_delete:
+        os.remove(video)
+        print(f"Deleted old video: {video}")
 
 if __name__ == "__main__":
     print("Starting video scraping process...")
