@@ -35,7 +35,7 @@
                     </div>
                 </div>
                 <div class="button-group">
-                    <button type="submit" class="translate-button"><strong>Convert to ASL</strong></button>
+                    <button type="submit" class="translate-button" id="submitButton" disabled><strong>Convert to ASL</strong></button>
                 </div>
             </form>
 
@@ -44,7 +44,6 @@
                 <h2>ASL Translation</h2>
                 <p class="translation-text">{{ asl_translation }}</p>
                 
-                <!-- Add this new section for videos -->
                 {% if video_data %}
                 <div class="video-container">
                     <h3>Sign Language Video</h3>
@@ -60,7 +59,6 @@
                         </video>
                     </div>
                     
-                    <!-- Video Controls -->
                     <div class="video-controls">
                         <button id="playBtn" class="control-button">
                             <i class="fas fa-play"></i> Play
@@ -83,7 +81,6 @@
         </main>
     </div>
 
-    <!-- Toast for notifications -->
     <div class="toast-container">
         <div id="statusToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
@@ -106,8 +103,7 @@
             }
             
             button.classList.add('recording');
-            icon.classList.remove('fa-microphone');
-            icon.classList.add('fa-microphone-slash');
+            icon.classList.replace('fa-microphone', 'fa-microphone-slash');
             
             showToast('Recording...', 'Started recording');
             
@@ -131,8 +127,7 @@
                 showToast('Error', error.message, true);
             } finally {
                 button.classList.remove('recording', 'processing');
-                icon.classList.remove('fa-microphone-slash');
-                icon.classList.add('fa-microphone');
+                icon.classList.replace('fa-microphone-slash', 'fa-microphone');
             }
         });
 
@@ -148,35 +143,37 @@
             const bsToast = new bootstrap.Toast(toast);
             bsToast.show();
         }
-    </script>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const videos = document.querySelectorAll('video'); // Select all video elements
-        const playBtn = document.getElementById('playBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const restartBtn = document.getElementById('restartBtn');
-        
-        if (videos.length > 0) {
-            // Play button
-            playBtn.addEventListener('click', () => {
-                videos.forEach(video => video.play()); // Play all videos
-            });
+        const textarea = document.getElementById('input_text');
+        const submitButton = document.getElementById('submitButton');
 
-            // Pause button
-            pauseBtn.addEventListener('click', () => {
-                videos.forEach(video => video.pause()); // Pause all videos
-            });
+        textarea.addEventListener('input', function() {
+            submitButton.disabled = !textarea.value.trim();
+        });
 
-            // Restart button
-            restartBtn.addEventListener('click', () => {
-                videos.forEach(video => {
-                    video.currentTime = 0; // Reset time for each video
-                    video.play(); // Play each video
+        document.addEventListener('DOMContentLoaded', function() {
+            const videos = document.querySelectorAll('video');
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            
+            if (videos.length > 0) {
+                playBtn.addEventListener('click', () => {
+                    videos.forEach(video => video.play());
                 });
-            });
-        }
-    });
+
+                pauseBtn.addEventListener('click', () => {
+                    videos.forEach(video => video.pause());
+                });
+
+                restartBtn.addEventListener('click', () => {
+                    videos.forEach(video => {
+                        video.currentTime = 0;
+                        video.play();
+                    });
+                });
+            }
+        });
     </script>
 </body>
 
