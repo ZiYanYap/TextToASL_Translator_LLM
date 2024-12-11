@@ -37,6 +37,10 @@ def get_video_path(video_url):
 
 def query_llm(prompt):
     response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
+    # Check if the response is valid
+    if response.status_code != 200:
+        print(f"Error querying LLM: {response.status_code} - {response.text}")
+        return ""
     # Remove any punctuation from the response text
     return ''.join(c for c in response.json()[0]["generated_text"] if c.isalnum())
 

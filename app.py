@@ -75,12 +75,7 @@ def metadata():
         video_urls = request.form.getlist("video_urls[]")
 
         # Prepare the data for MongoDB
-        meanings_data = []
-        for meaning, video_url in zip(meanings, video_urls):
-            meanings_data.append({
-                "meaning": meaning,
-                "video_url": video_url
-            })
+        meanings_data = [{"meaning": meaning, "video_url": video_url} for meaning, video_url in zip(meanings, video_urls)]
 
         # Create or update the document for related words
         word_data = {
