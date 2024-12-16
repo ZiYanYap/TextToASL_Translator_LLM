@@ -22,7 +22,7 @@
         </header>
 
         <main class="translator-container">
-            <form method="POST" class="form-group">
+            <form id="translationForm" method="POST" class="form-group">
                 <div class="translation-boxes">
                     <div class="input-group">
                         <textarea name="input_text" id="input_text" class="translator-input"
@@ -35,30 +35,25 @@
                     </div>
                 </div>
                 <div class="button-group">
-                    <button type="submit" class="translate-button" id="submitButton" disabled><strong>Convert to ASL</strong></button>
+                    <button type="submit" class="translate-button" id="submitButton">
+                        <strong id="buttonText">Convert to ASL</strong>
+                        <div class="loading-spinner" id="buttonSpinner" style="display: none;"></div>
+                    </button>
                 </div>
             </form>
 
-            {% if asl_translation %}
-            <div class="output">
+            <div class="output" id="outputContainer" style="display: none;">
                 <h2>ASL Translation</h2>
-                <p class="translation-text">{{ asl_translation }}</p>
-                
-                {% if video_data %}
-                <div class="video-container">
+                <p class="translation-text" id="aslTranslation"></p>
+                <div class="video-container" id="videoContainer" style="display: none;">
                     <h3>Sign Language Video</h3>
                     <div class="merged-video-container">
-                        <div class="current-word"></div>
-                        <video id="mergedVideo" width="400" height="360" nocontrol muted>
-                            <source src="{{ url_for('static', filename='temp/merged_video.mp4') }}?v={{ current_time }}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                        <video id="mergedVideo2" width="400" height="360" nocontrol muted>
-                            <source src="{{ url_for('static', filename='temp/output_video.mp4') }}?v={{ current_time }}" type="video/mp4">
+                        <div class="current-word" id="currentWord"></div>
+                        <video id="outputVideo" width="400" height="360" nocontrol muted>
+                            <source id="videoSource" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     </div>
-                    
                     <div class="video-controls">
                         <button id="playBtn" class="control-button">
                             <i class="fas fa-play"></i> Play
@@ -71,13 +66,8 @@
                         </button>
                     </div>
                 </div>
-                {% endif %}
             </div>
-            {% elif error %}
-            <div class="error">
-                <p>{{ error }}</p>
-            </div>
-            {% endif %}
+            <div class="error" id="errorContainer" style="display: none;"></div>
         </main>
     </div>
 
@@ -117,8 +107,8 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    textarea.value = textarea.value 
-                        ? textarea.value + ' ' + data.text 
+                    textarea.value = textarea.value
+                        ? textarea.value + ' ' + data.text
                         : data.text;
                 } else {
                     showToast('Error', data.error || 'Failed to transcribe speech', true);
@@ -172,6 +162,59 @@
                         video.play();
                     });
                 });
+            }
+        });
+
+        document.getElementById('translationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const textarea = document.getElementById('input_text');
+            const outputContainer = document.getElementById('outputContainer');
+            const errorContainer = document.getElementById('errorContainer');
+            const aslTranslation = document.getElementById('aslTranslation');
+            const videoContainer = document.getElementById('videoContainer');
+            const videoSource = document.getElementById('videoSource');
+            const currentWord = document.getElementById('currentWord');
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonSpinner = document.getElementById('buttonSpinner');
+
+            outputContainer.style.display = 'none';
+            errorContainer.style.display = 'none';
+
+            // Disable the button and show loading spinner
+            submitButton.disabled = true;
+            buttonText.style.display = 'none';
+            buttonSpinner.style.display = 'inline-block';
+
+            try {
+                const response = await fetch('/api/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ input_text: textarea.value })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    aslTranslation.textContent = data.asl_translation;
+                    videoSource.src = data.output_path + '?t=' + new Date().getTime();
+                    document.getElementById('outputVideo').load();
+                    videoContainer.style.display = 'block';
+                    outputContainer.style.display = 'block';
+                } else {
+                    errorContainer.textContent = data.error;
+                    errorContainer.style.display = 'block';
+                }
+            } catch (error) {
+                errorContainer.textContent = 'An error occurred: ' + error.message;
+                errorContainer.style.display = 'block';
+            } finally {
+                // Re-enable the button and hide loading spinner
+                submitButton.disabled = false;
+                buttonText.style.display = 'inline';
+                buttonSpinner.style.display = 'none';
             }
         });
     </script>

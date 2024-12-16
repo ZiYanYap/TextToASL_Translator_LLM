@@ -1,178 +1,151 @@
 import os
 import requests
-from pymongo import MongoClient
 from dotenv import load_dotenv
 from moviepy import VideoFileClip, concatenate_videoclips
+from tools.mongo_client import init_mongo_client
 
 # Load environment variables
 load_dotenv()
-uri = os.getenv("MONGODB_URI")
-client = MongoClient(uri)
-db = client["asl_project"]
-collection = db["word_metadata"]
 
-# Define base path for videos
-BASE_VIDEO_PATH = os.path.join("static", "sign_videos")
+# Configuration
+WSD_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
+BASE_VIDEO_PATH = os.path.normpath("static/sign_videos")
+VIDEO_RESOLUTION = (480,360)
+OUTPUT_VIDEO_FILENAME = "merged_video.mp4"
+TEMP_DIR = os.path.normpath("static/temp")
 
-API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
-headers = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
-
-def get_video_path(video_url):
-    """
-    Generate the video path based on the video URL
-    """
-    try:
-        if not video_url:
-            return None
-        if "youtube.com" in video_url or "youtu.be" in video_url:
-            # Handle YouTube URLs
-            video_filename = video_url.split('/')[-1] if 'youtu.be' in video_url else video_url.split('v=')[-1]
-            return os.path.join(BASE_VIDEO_PATH, f"{video_filename}.mp4")
-        else:
-            # Handle direct video URLs
-            return os.path.join(BASE_VIDEO_PATH, video_url.split('/')[-1])
-    except Exception as e:
-        print(f"Error generating video path for {video_url}: {str(e)}")
+# Get video path based on URL
+def construct_video_path(video_url):
+    if not video_url:
         return None
+    if "youtube.com" in video_url or "youtu.be" in video_url:
+        video_filename = video_url.split('/')[-1] if 'youtu.be' in video_url else video_url.split('v=')[-1]
+        return os.path.join(BASE_VIDEO_PATH, f"{video_filename}.mp4")
+    return os.path.join(BASE_VIDEO_PATH, video_url.split('/')[-1])
 
+# Query the LLM API
 def query_llm(prompt):
-    response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
-    # Check if the response is valid
+    headers = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
+    response = requests.post(WSD_API_URL, headers=headers, json={"inputs": prompt})
     if response.status_code != 200:
         print(f"Error querying LLM: {response.status_code} - {response.text}")
         return ""
-    # Remove any punctuation from the response text
     return ''.join(c for c in response.json()[0]["generated_text"] if c.isalnum())
 
-def get_word_video_mapping(word, context=None):
-    """
-    Fetch the specified word and its corresponding video paths from the MongoDB collection.
-    Returns a list of tuples mapping words/chars to their video paths.
-    If multiple definitions exist, uses context to select the appropriate video path.
-    If the word is not found, uses fingerspelling for the letters of the word.
-    """
-    # Normalize input
-    word = word.lower().strip()
-    
-    # Handle special characters
-    if '-' in word and not collection.find_one({"words": word}):
-        word = word.replace('-', ' ')
-    
-    # Split by spaces and handle '?'
+# Fetch word document from MongoDB
+def fetch_word_document(collection, word):
+    return collection.find_one({"words": word})
+
+# Fetch character document from MongoDB
+def fetch_character_document(collection, char):
+    return collection.find_one({"words": char})
+
+# Merge video files
+def merge_video_files(video_paths):
+    clips = [VideoFileClip(path, target_resolution=VIDEO_RESOLUTION) for path in video_paths]
+    final_clip = concatenate_videoclips(clips, method="compose")
+    os.makedirs(TEMP_DIR, exist_ok=True)
+    output_path = os.path.join(TEMP_DIR, OUTPUT_VIDEO_FILENAME)
+    final_clip.write_videofile(output_path, codec='libx264', audio_codec='aac', preset='medium', fps=30)
+    for clip in clips:
+        clip.close()
+    final_clip.close()
+
+# Prepare words to check
+def prepare_words(word):
     words_to_check = []
     for w in word.split():
         if w:
-            # Handle question marks anywhere in the word
             if '?' in w:
                 w = w.replace('?', '')
                 words_to_check.extend([w, '?'] if w else ['?'])
             else:
                 words_to_check.append(w)
+    return words_to_check
 
+# Handle definitions and return video mapping
+def handle_definitions(collection, definitions, word, context):
     word_video_map = []
-    
-    for w in words_to_check:
-        # Fetch the document for the specified word
-        document = collection.find_one({"words": w})
-        
-        if document:
-            definitions = document.get("definitions", [])
-            if len(definitions) > 1 and context:
-                # Prepare descriptions for LLM more concisely
-                descriptions = [f"{i + 1}. {d.get('meaning')}" for i, d in enumerate(definitions)]
+    if len(definitions) > 1 and context:
+        descriptions = [f"{i + 1}. {d.get('meaning')}" for i, d in enumerate(definitions)]
+        prompt = (
+            f'Word Sense Disambiguation Task:\n\n'
+            f'Word: "{word.upper()}"\n'
+            f'Sentence: "{context}"\n\n'
+            f'Meanings:\n'
+            f'{chr(10).join([f"{description}" for description in descriptions])}\n\n'
+            f'Instructions:\n'
+            f'Based on the context provided in the sentence, identify which meaning of the word "{word.upper()}" is most appropriate.\n'
+            f'Return the number corresponding to the correct meaning.'
+        )
+        # print(prompt)
+        response = query_llm(prompt)
+        # print(response)
+        selected_index = parse_llm_response(response, len(definitions))
+        video_url = definitions[selected_index].get("video_url")
+        video_path = construct_video_path(video_url)
+        if video_path and os.path.exists(video_path):
+            word_video_map.append((word, video_path))
+    else:
+        for definition in definitions:
+            video_url = definition.get("video_url")
+            video_path = construct_video_path(video_url)
+            if video_path and os.path.exists(video_path):
+                word_video_map.append((word, video_path))
+                break
+    return word_video_map
 
-                prompt = (
-                    f'Which definition of the word "{w.upper()}" is most appropriate in the context of the phrase "{context}"?\n\n'
-                    f'Descriptions:\n{", ".join(descriptions)}\n\n'
-                    f'Please choose the best definition (1 or 2).'
-                )
-                print(f"Resolving ambiguity for {w}")
-                response = query_llm(prompt)
-                try:
-                    selected_index = int(response.strip()) - 1  # Subtract 1 to convert to 0-based index
-                    if not 0 <= selected_index < len(definitions):
-                        selected_index = 0  # Default to first if out of range
-                except ValueError:
-                    selected_index = 0  # Default to first definition if parsing fails
-                
-                if video_url := definitions[selected_index].get("video_url"):
-                    video_path = get_video_path(video_url)
-                    if video_path and os.path.exists(video_path):
-                        word_video_map.append((w, video_path))
-            else:
-                # Use first available video URL if no context or single definition
-                for definition in definitions:
-                    if video_url := definition.get("video_url"):
-                        video_path = get_video_path(video_url)
-                        if video_path and os.path.exists(video_path):
-                            word_video_map.append((w, video_path))
-                            break
+# Parse LLM response
+def parse_llm_response(response, num_definitions):
+    try:
+        selected_index = int(response.strip()) - 1
+        return max(0, min(selected_index, num_definitions - 1))  # Ensure within bounds
+    except ValueError:
+        return 0  # Default to first definition if parsing fails
+
+# Fingerspell a word
+def fingerspell_word(collection, word):
+    word_video_map = []
+    for char in word:
+        char_doc = fetch_character_document(collection, char)
+        if char_doc and char_doc.get("definitions"):
+            video_url = char_doc["definitions"][0].get("video_url")
+            if video_url:
+                video_path = construct_video_path(video_url)
+                word_video_map.append((char, video_path))
+    return word_video_map
+
+# Get video mapping for a word
+def get_word_video_mapping(collection, word, context=None):
+    word = word.lower().strip()
+    if '-' in word and not fetch_word_document(collection, word):
+        word = word.replace('-', ' ')
+    
+    words_to_check = prepare_words(word)
+    word_video_map = []
+
+    for w in words_to_check:
+        document = fetch_word_document(collection, w)
+        if document:
+            word_video_map.extend(handle_definitions(collection, document.get("definitions", []), w, context))
         else:
-            # Fingerspelling for non-existent words
-            for char in w:
-                # Look up the character in MongoDB
-                char_doc = collection.find_one({"words": char})
-                if char_doc and char_doc.get("definitions"):
-                    video_url = char_doc["definitions"][0].get("video_url")
-                    if video_url:
-                        video_path = get_video_path(video_url)
-                        word_video_map.append((char, video_path))
+            word_video_map.extend(fingerspell_word(collection, w))
 
     return word_video_map
 
-def merge_videos(video_paths):
-    """
-    Merge multiple video files into a single video file.
-    Args:
-        video_paths (list): List of paths to video files to merge
-    Returns:
-        str: Path to the merged video file
-    """
-    clips = []
-    for path in video_paths:
-        # Explicitly set the video size and ensure proper loading
-        clip = VideoFileClip(path, target_resolution=(480, 360))
-        clips.append(clip)
-    
-    final_clip = concatenate_videoclips(clips, method="compose")
-    
-    # Create temp directory if it doesn't exist
-    temp_dir = os.path.join('static', 'temp')
-    os.makedirs(temp_dir, exist_ok=True)
-    
-    # Save merged video with specific codec settings
-    output_path = os.path.join(temp_dir, 'merged_video.mp4')
-    final_clip.write_videofile(output_path, 
-                             codec='libx264', 
-                             audio_codec='aac',
-                             preset='medium',
-                             fps=30)
-    
-    # Close all clips
-    for clip in clips:
-        clip.close()
-    final_clip.close()
-    
-    return output_path
-
+# Prepare display data
 def prepare_display_data(asl_translation, context=None):
-    """
-    Prepare the display data by matching the ASL translation words with their video paths.
-    Returns a tuple containing:
-        - List of tuples (word, video_path)
-        - Path to merged video
-    """
     if not asl_translation:
-        return [], None
+        return False
     
     display_data = []
+    collection = init_mongo_client()
     for word in asl_translation.split():
-        word_mapping = get_word_video_mapping(word, context=context)
+        word_mapping = get_word_video_mapping(collection, word, context=context)
         display_data.extend(word_mapping)
     
-    # Get video paths and merge them
-    video_paths = [os.path.join('static', path.replace('static\\', '').replace('\\', '/')) 
-                  for _, path in display_data]
-    merged_video_path = merge_videos(video_paths)
-    
-    return display_data, merged_video_path
+    video_paths = [os.path.normpath(os.path.join('static', path.replace('static\\', '').replace('\\', '/'))) 
+                   for _, path in display_data]
+    merge_video_files(video_paths)
+
+    return True

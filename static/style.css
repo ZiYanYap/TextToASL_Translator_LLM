@@ -58,6 +58,7 @@ form {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 20px;
 }
 
 /* Common Input Styles */
@@ -97,19 +98,13 @@ input[name="word_name"] {
 .search-input {
     border-radius: 25px;
     padding: 12px 20px;
-    margin-bottom: 30px;
 }
 
 .translator-input {
-    margin-bottom: 20px;
     resize: vertical;
 }
 
 /* Form Section Styles */
-.form-section {
-    margin-bottom: 25px;
-}
-
 .form-section label {
     font-size: 16px;
     color: var(--primary-color);
@@ -119,7 +114,6 @@ input[name="word_name"] {
 }
 
 .meaning-url-group {
-    margin-bottom: 15px;
     padding: 15px;
     background-color: var(--input-dark);
     border-radius: var(--border-radius-md);
@@ -406,7 +400,6 @@ nav a:hover {
     color: var(--text-light);
     font-size: 16px;
     transition: var(--transition-standard);
-    margin-bottom: 20px;
     resize: vertical;
 }
 
@@ -425,6 +418,7 @@ nav a:hover {
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition-standard);
+    display: flex;
 }
 
 .translate-button:hover {
@@ -440,10 +434,6 @@ nav a:hover {
 /* Add Word page specific styles */
 .add-word-container {
     padding: 20px;
-}
-
-.form-section {
-    margin-bottom: 25px;
 }
 
 .custom-input {
@@ -513,13 +503,6 @@ nav a:hover {
     align-items: center;
 }
 
-.meaning-url-group {
-    margin-bottom: 15px;
-    padding: 15px;
-    background-color: var(--input-dark);
-    border-radius: var(--border-radius-md);
-}
-
 .row {
     align-items: center;
 }
@@ -559,7 +542,6 @@ input[name="word_name"] {
 .input-group {
     position: relative;
     width: 100%;
-    margin-bottom: 20px;
 }
 
 /* Microphone button styling */
@@ -683,7 +665,6 @@ input[name="word_name"] {
     display: flex;
     flex-direction: row;  /* Ensure horizontal layout */
     gap: 20px;
-    margin-bottom: 20px;
     width: 100%;
 }
 
@@ -734,7 +715,6 @@ input[name="word_name"] {
     display: flex;
     gap: 20px;
     justify-content: center;
-    margin-top: 20px;
 }
 
 .button-group .translate-button {
@@ -794,8 +774,6 @@ video {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
-    margin: 20px 0;
 }
 
 .current-word {

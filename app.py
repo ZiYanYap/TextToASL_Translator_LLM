@@ -1,55 +1,47 @@
 from flask import Flask, render_template, request, jsonify
-from pymongo import MongoClient
 from dotenv import load_dotenv
-import os
 from text_restructuring.asl_converter import convert_to_asl
 from speech_to_text.speech_to_text_converter import record_and_transcribe
 from multilingual_translation.multilingual_translator import translate_to_english
 from sign_synthesis.video_matcher import prepare_display_data
 from sign_synthesis.pose_extraction import pose_extraction
+from tools.mongo_client import init_mongo_client
 import time
 
 app = Flask(__name__)
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Get MongoDB URI from environment variable
-uri = os.getenv("MONGODB_URI")
-client = MongoClient(uri)
-db = client["asl_project"]
-collection = db["word_metadata"]
+collection = init_mongo_client()
 
 @app.route("/", methods=["GET"])
 def index_get():
     # Render the index page with initial values
     return render_template("index.html", original_text=None, asl_translation=None, video_data=None)
 
-@app.route("/", methods=["POST"])
-def index_post():
-    original_text = request.form.get("input_text")
+@app.route("/api/translate", methods=["POST"])
+def translate_text():
+    original_text = request.json.get("input_text")
     if not original_text:
         return jsonify({"error": "No input text provided"}), 400
     try:
-        # Translate to English
+        print("Original text:", original_text)
         english_text = translate_to_english(original_text)
-        print(f"Translated text: {english_text}")  # Debugging line
-        
-        # Generate ASL Gloss from the English text
+        print("Translated text:", english_text)
         asl_translation = convert_to_asl(english_text)
+        print("ASL gloss:", asl_translation)
         
-        # Get video paths and merged video
-        video_data, merged_video_path = prepare_display_data(asl_translation, context=english_text)
-        pose_extraction()
+        if prepare_display_data(asl_translation, context=english_text):
+            output_path = pose_extraction()
+        else:
+            output_path = None
 
-        current_time = int(time.time())  # Get current timestamp
-        return render_template("index.html", 
-                                original_text=original_text,
-                                asl_translation=asl_translation,
-                                video_data=video_data,
-                                current_time=current_time)
+        return jsonify({
+            "asl_translation": asl_translation,
+            "output_path": output_path
+        })
     except Exception as e:
-        return render_template("index.html", error=f"Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/speech-to-text", methods=["POST"])
 def speech_to_text():

@@ -31,38 +31,22 @@ def draw_styled_landmarks(image, results):
     mask = np.zeros_like(image)
 
     # Draw landmarks for face, pose, and hands
-    if results.face_landmarks:
-        mp_drawing.draw_landmarks(
-            mask,
-            results.face_landmarks,
-            mp_holistic.FACEMESH_CONTOURS,
-            None,
-            mp_drawing.DrawingSpec(color=DRAW_COLOR, thickness=2, circle_radius=2)
-        )
-    if results.pose_landmarks:
-        mp_drawing.draw_landmarks(
-            mask,
-            results.pose_landmarks,
-            custom_pose_connections,
-            None,
-            mp_drawing.DrawingSpec(color=DRAW_COLOR, thickness=2, circle_radius=2)
-        )
-    if results.left_hand_landmarks:
-        mp_drawing.draw_landmarks(
-            mask,
-            results.left_hand_landmarks,
-            mp_holistic.HAND_CONNECTIONS,
-            None,
-            mp_drawing.DrawingSpec(color=DRAW_COLOR, thickness=2, circle_radius=2)
-        )
-    if results.right_hand_landmarks:
-        mp_drawing.draw_landmarks(
-            mask,
-            results.right_hand_landmarks,
-            mp_holistic.HAND_CONNECTIONS,
-            None,
-            mp_drawing.DrawingSpec(color=DRAW_COLOR, thickness=2, circle_radius=2)
-        )
+    landmarks_to_draw = [
+        (results.face_landmarks, mp_holistic.FACEMESH_CONTOURS),
+        (results.pose_landmarks, custom_pose_connections),
+        (results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS),
+        (results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+    ]
+
+    for landmarks, connections in landmarks_to_draw:
+        if landmarks:
+            mp_drawing.draw_landmarks(
+                mask,
+                landmarks,
+                connections,
+                None,
+                mp_drawing.DrawingSpec(color=DRAW_COLOR, thickness=2, circle_radius=2)
+            )
 
     # Connect wrists
     connect_wrists(mask, results)
@@ -112,8 +96,3 @@ def pose_extraction(video_path='static/temp/merged_video.mp4', output_path='stat
             cv2.destroyAllWindows()
 
     return output_path  # Return the path to the processed video
-
-# Ensure the function is available for import
-if __name__ == "__main__":
-    # You can add test code here if needed
-    pass

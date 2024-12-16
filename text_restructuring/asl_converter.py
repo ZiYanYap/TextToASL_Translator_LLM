@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
 from text_restructuring.prompt_template import SYSTEM_PROMPT
-from typing import Optional
 import logging
 
 # Initialize global variables
@@ -36,14 +35,14 @@ def post_process_asl_response(response: str) -> str:
 
     return cleaned_response
 
-def convert_to_asl(input_text: str) -> Optional[str]:
+def convert_to_asl(input_text: str):
     if not input_text.strip():
         return None
 
     try:
         messages = [
             system_message,
-            {"role": "user", "content": "'" + input_text + "'"}
+            {"role": "user", "content": f"'{input_text}'"}
         ]
 
         response = client.chat.completions.create(

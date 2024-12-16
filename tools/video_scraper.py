@@ -1,6 +1,6 @@
 import os
 import requests
-from pymongo import MongoClient
+from tools.mongo_client import init_mongo_client
 from dotenv import load_dotenv
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -9,11 +9,7 @@ import yt_dlp
 # Load environment variables
 load_dotenv()
 
-# MongoDB connection
-uri = os.getenv("MONGODB_URI")
-client = MongoClient(uri)
-db = client["asl_project"]
-collection = db["word_metadata"]
+collection = init_mongo_client()
 
 # Define base path for videos
 BASE_VIDEO_PATH = os.path.join("static", "sign_videos")
