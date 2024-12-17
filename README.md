@@ -3,8 +3,10 @@ A Python Flask application that utilises prompt engineering technique on LLM to 
 
 ## Things to include in .env file
 ```
+DB_NAME=
+COLLECTION_NAME=
 HUGGINGFACE_TOKEN=hf_xxxxxxxxxxxxxxx
-MONGODB_URI=mongodb+srv://<USERNAME>:<PASSWORD>@texttoasl-cluster.dhra8.mongodb.net/?retryWrites=true&w=majority&appName=TextToASL-Cluster
+MONGODB_URI=mongodb+srv://<USERNAME>:<PASSWORD>@...
 ```
 
 ## To start scraping video files into local
