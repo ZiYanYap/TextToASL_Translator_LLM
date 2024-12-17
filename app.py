@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-from text_restructuring.asl_converter import convert_to_asl
-from speech_to_text.speech_to_text_converter import record_and_transcribe
-from multilingual_translation.multilingual_translator import translate_to_english
-from sign_synthesis.video_matcher import prepare_display_data
-from sign_synthesis.pose_extraction import pose_extraction
-from tools.mongo_client import init_mongo_client
+from app.services.text_restructuring.asl_converter import convert_to_asl
+from app.services.speech_to_text.speech_to_text_converter import record_and_transcribe
+from app.services.multilingual_translation.multilingual_translator import translate_to_english
+from app.services.sign_synthesis.video_matcher import prepare_display_data
+from app.services.sign_synthesis.pose_extraction import pose_extraction
+from app.services.tools.mongo_client import init_mongo_client
 
 app = Flask(__name__)
 
@@ -45,7 +45,6 @@ def translate_text():
 @app.route("/speech-to-text", methods=["POST"])
 def speech_to_text():
     try:
-        # Call the record_and_transcribe function
         transcription = record_and_transcribe()
         
         if not transcription:
