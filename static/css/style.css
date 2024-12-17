@@ -723,6 +723,9 @@ input[name="word_name"] {
 
 /* Video container styles */
 .video-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     margin-top: 30px;
     padding: 20px;
     background-color: var(--input-dark);
@@ -784,7 +787,7 @@ video {
     text-align: center;
 }
 
-#mergedVideo, #mergedVideo2 {
+#outputVideo {
     border-radius: 12px;
     background-color: #000;
     max-width: 100%;

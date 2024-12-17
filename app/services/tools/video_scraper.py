@@ -1,6 +1,6 @@
 import os
 import requests
-from tools.mongo_client import init_mongo_client
+from mongo_client import init_mongo_client
 from dotenv import load_dotenv
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed

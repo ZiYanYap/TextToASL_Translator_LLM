@@ -2,7 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from moviepy import VideoFileClip, concatenate_videoclips
-from tools.mongo_client import init_mongo_client
+from app.services.tools.mongo_client import init_mongo_client
 
 # Load environment variables
 load_dotenv()

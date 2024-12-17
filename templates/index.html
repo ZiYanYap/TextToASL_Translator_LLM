@@ -7,7 +7,7 @@
     <title>Text to ASL Translator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
@@ -35,7 +35,7 @@
                     </div>
                 </div>
                 <div class="button-group">
-                    <button type="submit" class="translate-button" id="submitButton">
+                    <button type="submit" class="translate-button" id="submitButton" disabled>
                         <strong id="buttonText">Convert to ASL</strong>
                         <div class="loading-spinner" id="buttonSpinner" style="display: none;"></div>
                     </button>
@@ -48,7 +48,6 @@
                 <div class="video-container" id="videoContainer" style="display: none;">
                     <h3>Sign Language Video</h3>
                     <div class="merged-video-container">
-                        <div class="current-word" id="currentWord"></div>
                         <video id="outputVideo" width="400" height="360" nocontrol muted>
                             <source id="videoSource" type="video/mp4">
                             Your browser does not support the video tag.
@@ -82,142 +81,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('micButton').addEventListener('click', async function() {
-            const button = this;
-            const textarea = document.getElementById('input_text');
-            const icon = button.querySelector('i');
-            
-            if (button.classList.contains('recording')) {
-                return; // Prevent multiple recordings
-            }
-            
-            button.classList.add('recording');
-            icon.classList.replace('fa-microphone', 'fa-microphone-slash');
-            
-            showToast('Recording...', 'Started recording');
-            
-            try {
-                button.classList.add('processing');
-                
-                const response = await fetch('/speech-to-text', {
-                    method: 'POST'
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    textarea.value = textarea.value
-                        ? textarea.value + ' ' + data.text
-                        : data.text;
-                } else {
-                    showToast('Error', data.error || 'Failed to transcribe speech', true);
-                }
-            } catch (error) {
-                showToast('Error', error.message, true);
-            } finally {
-                button.classList.remove('recording', 'processing');
-                icon.classList.replace('fa-microphone-slash', 'fa-microphone');
-            }
-        });
-
-        function showToast(title, message, isError = false) {
-            const toast = document.getElementById('statusToast');
-            const toastTitle = document.getElementById('toastTitle');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toast.classList.toggle('toast-error', isError);
-            toastTitle.textContent = title;
-            toastMessage.textContent = message;
-            
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-        }
-
-        const textarea = document.getElementById('input_text');
-        const submitButton = document.getElementById('submitButton');
-
-        textarea.addEventListener('input', function() {
-            submitButton.disabled = !textarea.value.trim();
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const videos = document.querySelectorAll('video');
-            const playBtn = document.getElementById('playBtn');
-            const pauseBtn = document.getElementById('pauseBtn');
-            const restartBtn = document.getElementById('restartBtn');
-            
-            if (videos.length > 0) {
-                playBtn.addEventListener('click', () => {
-                    videos.forEach(video => video.play());
-                });
-
-                pauseBtn.addEventListener('click', () => {
-                    videos.forEach(video => video.pause());
-                });
-
-                restartBtn.addEventListener('click', () => {
-                    videos.forEach(video => {
-                        video.currentTime = 0;
-                        video.play();
-                    });
-                });
-            }
-        });
-
-        document.getElementById('translationForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const textarea = document.getElementById('input_text');
-            const outputContainer = document.getElementById('outputContainer');
-            const errorContainer = document.getElementById('errorContainer');
-            const aslTranslation = document.getElementById('aslTranslation');
-            const videoContainer = document.getElementById('videoContainer');
-            const videoSource = document.getElementById('videoSource');
-            const currentWord = document.getElementById('currentWord');
-            const submitButton = document.getElementById('submitButton');
-            const buttonText = document.getElementById('buttonText');
-            const buttonSpinner = document.getElementById('buttonSpinner');
-
-            outputContainer.style.display = 'none';
-            errorContainer.style.display = 'none';
-
-            // Disable the button and show loading spinner
-            submitButton.disabled = true;
-            buttonText.style.display = 'none';
-            buttonSpinner.style.display = 'inline-block';
-
-            try {
-                const response = await fetch('/api/translate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ input_text: textarea.value })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    aslTranslation.textContent = data.asl_translation;
-                    videoSource.src = data.output_path + '?t=' + new Date().getTime();
-                    document.getElementById('outputVideo').load();
-                    videoContainer.style.display = 'block';
-                    outputContainer.style.display = 'block';
-                } else {
-                    errorContainer.textContent = data.error;
-                    errorContainer.style.display = 'block';
-                }
-            } catch (error) {
-                errorContainer.textContent = 'An error occurred: ' + error.message;
-                errorContainer.style.display = 'block';
-            } finally {
-                // Re-enable the button and hide loading spinner
-                submitButton.disabled = false;
-                buttonText.style.display = 'inline';
-                buttonSpinner.style.display = 'none';
-            }
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 
 </html>

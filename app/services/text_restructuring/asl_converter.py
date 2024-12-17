@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
-from text_restructuring.prompt_template import SYSTEM_PROMPT
+from app.services.text_restructuring.prompt_template import SYSTEM_PROMPT
 import logging
 
 # Initialize global variables
