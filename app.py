@@ -6,7 +6,6 @@ from multilingual_translation.multilingual_translator import translate_to_englis
 from sign_synthesis.video_matcher import prepare_display_data
 from sign_synthesis.pose_extraction import pose_extraction
 from tools.mongo_client import init_mongo_client
-import time
 
 app = Flask(__name__)
 
