@@ -1,64 +1,26 @@
 from flask import Flask, render_template, request, jsonify
-from dotenv import load_dotenv
 from app.services.text_restructuring.asl_converter import convert_to_asl
 from app.services.speech_to_text.speech_to_text_converter import record_and_transcribe
 from app.services.multilingual_translation.multilingual_translator import translate_to_english
 from app.services.sign_synthesis.video_matcher import prepare_display_data
 from app.services.sign_synthesis.pose_extraction import pose_extraction
 from app.services.tools.mongo_client import init_mongo_client
+from app.config import MAX_TOKENS
 
 app = Flask(__name__)
-
-load_dotenv()
 
 collection = init_mongo_client()
 
 @app.route("/", methods=["GET"])
-def index_get():
-    # Render the index page with initial values
-    return render_template("index.html", original_text=None, asl_translation=None, video_data=None)
+def render_index():
+    return render_template("index.html", page_title="Text to ASL Translator", max_tokens=MAX_TOKENS)
 
-@app.route("/api/translate", methods=["POST"])
-def translate_text():
-    original_text = request.json.get("input_text")
-    if not original_text:
-        return jsonify({"error": "No input text provided"}), 400
-    try:
-        print("Original text:", original_text)
-        english_text = translate_to_english(original_text)
-        print("Translated text:", english_text)
-        asl_translation = convert_to_asl(english_text)
-        print("ASL gloss:", asl_translation)
-        
-        if prepare_display_data(asl_translation, context=english_text):
-            output_path = pose_extraction()
-        else:
-            output_path = None
+@app.route("/words", methods=["GET"])
+def render_words_list():
+    return render_template("words.html", page_title="Supported Words")
 
-        return jsonify({
-            "asl_translation": asl_translation,
-            "output_path": output_path
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/speech-to-text", methods=["POST"])
-def speech_to_text():
-    try:
-        transcription = record_and_transcribe()
-        
-        if not transcription:
-            return jsonify({"success": False, "error": "No speech detected"}), 400
-            
-        return jsonify({
-            "success": True,
-            "text": transcription
-        })
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
-@app.route("/scrape", methods=["GET", "POST"])
-def metadata():
+@app.route("/admin/scrape", methods=["GET", "POST"])
+def handle_metadata():
     if request.method == "POST":
         word_names = request.form.get("word_name").lower().split(",")  # Split by comma
         meanings = request.form.getlist("meanings[]")
@@ -78,22 +40,91 @@ def metadata():
 
         try:
             collection.replace_one({"words": {"$in": word_data["words"]}}, word_data, upsert=True)
-            return render_template("scrape.html", metadata="Word added successfully!", error=None)
+            return render_template("scrape.html", page_title="Add a Word", metadata="Word added successfully!", error=None)
         except Exception as e:
-            return render_template("scrape.html", metadata=None, error=f"Error inserting or replacing document: {e}")
+            return render_template("scrape.html", page_title="Add a Word", metadata=None, error=f"Error inserting or replacing document: {e}")
 
-    return render_template("scrape.html", metadata=None, error=None)  # Placeholder for metadata
+    return render_template("scrape.html", page_title="Add a Word", metadata=None, error=None)
 
-@app.route("/words", methods=["GET"])
-def words_list():
-    # Fetch all words from the MongoDB collection
-    words_data = collection.find({}, {"words": 1})  # Only retrieve the 'words' field
-    words = [word["words"] for word in words_data]
+@app.route("/api/translate-to-english", methods=["POST"])
+def translate_to_english_api():
+    original_text = request.json.get("input_text")
+    if not original_text:
+        return jsonify({"error": "No input text provided"}), 400
+    try:
+        english_text = translate_to_english(original_text)
+        print(english_text)
+        return jsonify({"english_text": english_text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/convert-to-asl", methods=["POST"])
+def convert_to_asl_api():
+    english_text = request.json.get("english_text")
+    if not english_text:
+        return jsonify({"error": "No English text provided"}), 400
     
-    # Sort the words alphabetically
-    sorted_words = sorted(words, key=lambda x: x[0].lower())  # Sort by the first letter, case insensitive
+    word_count = len(english_text.split())
+    if word_count > MAX_TOKENS:
+        return jsonify({"error": f"Input too long! Please limit to {MAX_TOKENS} words."}), 400
     
-    return render_template("words.html", words=sorted_words)
+    try:
+        asl_translation = convert_to_asl(english_text)
+        print(asl_translation)
+        return jsonify({"asl_translation": asl_translation})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/prepare-video", methods=["POST"])
+def prepare_video_api():
+    asl_translation = request.json.get("asl_translation")
+    context = request.json.get("context")
+    if not asl_translation:
+        return jsonify({"error": "No ASL translation provided"}), 400
+    try:
+        if prepare_display_data(asl_translation, context=context):
+            return jsonify({"video_ready": True})
+        else:
+            return jsonify({"video_ready": False}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/pose-extraction", methods=["POST"])
+def pose_extraction_api():
+    try:
+        output_path = pose_extraction()
+        return jsonify({"output_path": output_path})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/speech-to-text", methods=["POST"])
+def speech_to_text_api():
+    try:
+        transcription = record_and_transcribe()
+        
+        if not transcription:
+            return jsonify({"success": False, "error": "No speech detected"}), 400
+            
+        return jsonify({
+            "success": True,
+            "text": transcription
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/words", methods=["GET"])
+def fetch_words_api():
+    try:
+        # Fetch all words from the MongoDB collection
+        words_data = collection.find({}, {"words": 1})  # Only retrieve the 'words' field
+        words = [word["words"] for word in words_data]
+        
+        # Flatten and sort the words alphabetically
+        sorted_words = sorted([w for sublist in words for w in sublist])
+        
+        return jsonify({"words": sorted_words})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.errorhandler(404)
 def page_not_found(e):

@@ -11,47 +11,73 @@
 
 <body>
   <div class="container">
-    <header>
-      <h1>Supported Words</h1>
-      {% set total_words = namespace(count=0) %}
-      {% for word_group in words %}
-      {% set total_words.count = total_words.count + word_group|length %}
-      {% endfor %}
-      <div class="word-count">Total Words: {{ total_words.count }}</div>
-
-      <nav class="nav-links">
-        <a href="{{ url_for('index_get') }}" class="nav-button">ASL Translator</a>
-        <a href="{{ url_for('words_list') }}" class="nav-button active">View Supported Words</a>
-        <a href="{{ url_for('metadata') }}" class="nav-button">Add a Word</a>
-      </nav>
-    </header>
+    {% include 'navbar.html' %}
 
     <main class="words-container">
+      <div id="totalWordsCount" class="word-count">Total Words: 0</div>
       <div class="search-box">
-        <input type="text" id="wordSearch" placeholder="Search words..." class="search-input">
+        <input type="text" id="wordSearch" placeholder="Search words..." class="search-input" />
       </div>
-
-      <div class="words-grid">
-        {% for word_group in words %}
-        {% for word in word_group %}
-        <div class="word-card">{{ word }}</div>
-        {% endfor %}
-        {% endfor %}
+    
+      <div id="wordsGrid" class="words-grid">
+        <!-- Words will be populated here -->
       </div>
     </main>
   </div>
 
   <script>
+    async function fetchWords() {
+      try {
+        const response = await fetch("/api/words");
+        const data = await response.json();
+  
+        if (data.words) {
+          renderWords(data.words);
+          updateTotalWords(data.words.length);
+        } else {
+          console.error("Error fetching words:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching words:", error.message);
+      }
+    }
+  
+    function renderWords(words) {
+      const wordsGrid = document.getElementById("wordsGrid");
+      wordsGrid.innerHTML = ""; // Clear existing words
+  
+      words.forEach(word => {
+        const wordCard = document.createElement("div");
+        wordCard.className = "word-card";
+        wordCard.textContent = word;
+        wordsGrid.appendChild(wordCard);
+      });
+    }
+  
+    function updateTotalWords(count) {
+      const totalWordsCount = document.getElementById("totalWordsCount");
+      totalWordsCount.textContent = `Total Words: ${count}`;
+    }
+  
     // Simple search functionality
-    document.getElementById('wordSearch').addEventListener('input', function (e) {
+    document.getElementById("wordSearch").addEventListener("input", function (e) {
       const searchTerm = e.target.value.toLowerCase();
-      const wordCards = document.querySelectorAll('.word-card');
-
+      const wordCards = document.querySelectorAll(".word-card");
+  
+      let visibleCount = 0;
       wordCards.forEach(card => {
         const word = card.textContent.toLowerCase();
-        card.style.display = word.includes(searchTerm) ? 'flex' : 'none';
+        const isVisible = word.includes(searchTerm);
+        card.style.display = isVisible ? "flex" : "none";
+        if (isVisible) visibleCount++;
       });
+  
+      // Update the visible word count
+      updateTotalWords(visibleCount);
     });
+  
+    // Fetch and render words on page load
+    document.addEventListener("DOMContentLoaded", fetchWords);
   </script>
 </body>
 

@@ -1,18 +1,8 @@
 import os
 import requests
-from dotenv import load_dotenv
 from moviepy import VideoFileClip, concatenate_videoclips
 from app.services.tools.mongo_client import init_mongo_client
-
-# Load environment variables
-load_dotenv()
-
-# Configuration
-WSD_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
-BASE_VIDEO_PATH = os.path.normpath("static/sign_videos")
-VIDEO_RESOLUTION = (480,360)
-OUTPUT_VIDEO_FILENAME = "merged_video.mp4"
-TEMP_DIR = os.path.normpath("static/temp")
+from app.config import WSD_API_URL, STATIC_VIDEO_PATH, TEMP_VIDEO_PATH, MERGED_VIDEO_PATH, HF_HEADERS
 
 # Get video path based on URL
 def construct_video_path(video_url):
@@ -20,13 +10,12 @@ def construct_video_path(video_url):
         return None
     if "youtube.com" in video_url or "youtu.be" in video_url:
         video_filename = video_url.split('/')[-1] if 'youtu.be' in video_url else video_url.split('v=')[-1]
-        return os.path.join(BASE_VIDEO_PATH, f"{video_filename}.mp4")
-    return os.path.join(BASE_VIDEO_PATH, video_url.split('/')[-1])
+        return os.path.normpath(os.path.join(STATIC_VIDEO_PATH, f"{video_filename}.mp4"))
+    return os.path.normpath(os.path.join(STATIC_VIDEO_PATH, video_url.split('/')[-1]))
 
 # Query the LLM API
 def query_llm(prompt):
-    headers = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_TOKEN')}"}
-    response = requests.post(WSD_API_URL, headers=headers, json={"inputs": prompt})
+    response = requests.post(WSD_API_URL, headers=HF_HEADERS, json={"inputs": prompt})
     if response.status_code != 200:
         print(f"Error querying LLM: {response.status_code} - {response.text}")
         return ""
@@ -42,11 +31,10 @@ def fetch_character_document(collection, char):
 
 # Merge video files
 def merge_video_files(video_paths):
-    clips = [VideoFileClip(path, target_resolution=VIDEO_RESOLUTION) for path in video_paths]
+    clips = [VideoFileClip(path, target_resolution=(480,360)) for path in video_paths]
     final_clip = concatenate_videoclips(clips, method="compose")
-    os.makedirs(TEMP_DIR, exist_ok=True)
-    output_path = os.path.join(TEMP_DIR, OUTPUT_VIDEO_FILENAME)
-    final_clip.write_videofile(output_path, codec='libx264', audio_codec='aac', preset='medium', fps=30)
+    os.makedirs(TEMP_VIDEO_PATH, exist_ok=True)
+    final_clip.write_videofile(MERGED_VIDEO_PATH, codec='libx264', audio_codec='aac', preset='medium', fps=30)
     for clip in clips:
         clip.close()
     final_clip.close()
@@ -144,8 +132,7 @@ def prepare_display_data(asl_translation, context=None):
         word_mapping = get_word_video_mapping(collection, word, context=context)
         display_data.extend(word_mapping)
     
-    video_paths = [os.path.normpath(os.path.join('static', path.replace('static\\', '').replace('\\', '/'))) 
-                   for _, path in display_data]
+    video_paths = [path for _, path in display_data]
     merge_video_files(video_paths)
 
     return True

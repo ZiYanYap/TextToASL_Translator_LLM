@@ -1,17 +1,9 @@
-import os
-from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
 from app.services.text_restructuring.prompt_template import SYSTEM_PROMPT
 import logging
+from app.config import HUGGINGFACE_TOKEN, ASL_CONVERTER_MODEL_NAME, MAX_TOKENS
 
-# Initialize global variables
-load_dotenv()
-api_token = os.getenv("HUGGINGFACE_TOKEN")
-if not api_token:
-    raise ValueError("HUGGINGFACE_TOKEN not found in environment variables")
-
-client = InferenceClient(token=api_token)
-model = "Qwen/Qwen2.5-72B-Instruct"
+client = InferenceClient(token=HUGGINGFACE_TOKEN())
 system_message = {"role": "system", "content": SYSTEM_PROMPT}
 
 # Define WH words as a constant
@@ -46,10 +38,10 @@ def convert_to_asl(input_text: str):
         ]
 
         response = client.chat.completions.create(
-            model=model,
+            model=ASL_CONVERTER_MODEL_NAME,
             messages=messages,
             temperature=0.2,
-            max_tokens=50,
+            max_tokens=MAX_TOKENS,
             top_p=0.8,
             stream=False
         )

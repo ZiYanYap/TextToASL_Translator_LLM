@@ -1,22 +1,12 @@
 import os
-from dotenv import load_dotenv
 import requests
 import sounddevice as sd
 import soundfile as sf
 import tempfile
 import numpy as np
+from app.config import ASR_API_URL, RECORD_DURATION, TARGET_LANGUAGE, HF_HEADERS
 
-# Load environment variables
-load_dotenv()
-api_token = os.getenv("HUGGINGFACE_TOKEN")
-if not api_token:
-    raise ValueError("HUGGINGFACE_TOKEN not found in environment variables")
-
-# Configuration
-API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo"
-headers = {"Authorization": f"Bearer {api_token}"}
 SAMPLE_RATE = 16000  # Whisper model's required sample rate
-DURATION = 5  # Recording duration in seconds
 
 def query(filename):
     """
@@ -26,14 +16,14 @@ def query(filename):
         data = f.read()
 
     params = {
-    "language": "en",  # Preferred transcription language
-    "task": "automatic-speech-recognition",  # Ensure transcription-only
-    "forced_language": "en"  # Enforce English
+        "language": TARGET_LANGUAGE,  # Preferred transcription language
+        "task": "automatic-speech-recognition",  # Ensure transcription-only
+        "forced_language": TARGET_LANGUAGE  # Enforce English
     }
 
     response = requests.post(
-        API_URL,
-        headers=headers,
+        ASR_API_URL,
+        headers=HF_HEADERS,
         params=params,  # Send parameters as query parameters
         data=data
     )
@@ -48,7 +38,7 @@ def record_and_transcribe():
     try:
         # Record audio
         audio_data = sd.rec(
-            int(SAMPLE_RATE * DURATION),
+            int(SAMPLE_RATE * RECORD_DURATION),
             samplerate=SAMPLE_RATE,
             channels=1,
             dtype='float32'
@@ -61,7 +51,7 @@ def record_and_transcribe():
         # Check if there's actual audio content
         audio_level = np.abs(audio_data).mean()
         
-        if audio_level < 0.001:  # Adjust this threshold as needed
+        if audio_level < 0.005:  # Adjust this threshold as needed
             print("Audio level too low")
             return ""
 

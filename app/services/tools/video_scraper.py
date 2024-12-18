@@ -1,18 +1,12 @@
 import os
 import requests
-from mongo_client import init_mongo_client
-from dotenv import load_dotenv
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import yt_dlp
-
-# Load environment variables
-load_dotenv()
+from mongo_client import init_mongo_client
+from app.config import STATIC_VIDEO_PATH
 
 collection = init_mongo_client()
-
-# Define base path for videos
-BASE_VIDEO_PATH = os.path.join("static", "sign_videos")
 
 def get_video_path(video_url):
     """
@@ -21,10 +15,10 @@ def get_video_path(video_url):
     if "youtube.com" in video_url or "youtu.be" in video_url:
         # Handle YouTube URLs
         video_filename = video_url.split('/')[-1] if 'youtu.be' in video_url else video_url.split('v=')[-1]
-        return os.path.join(BASE_VIDEO_PATH, f"{video_filename}.mp4")
+        return os.path.normpath(os.path.join(STATIC_VIDEO_PATH, f"{video_filename}.mp4"))
     else:
         # Handle direct video URLs
-        return os.path.join(BASE_VIDEO_PATH, video_url.split('/')[-1])
+        return os.path.normpath(os.path.join(STATIC_VIDEO_PATH, video_url.split('/')[-1]))
 
 def download_video(url, save_path):
     """
@@ -105,7 +99,7 @@ def scrape_videos():
             future.result()
     
     # Delete videos that are no longer in the database
-    existing_videos = set(os.path.join(BASE_VIDEO_PATH, f) for f in os.listdir(BASE_VIDEO_PATH) if f.endswith('.mp4'))
+    existing_videos = set(os.path.normpath(os.path.join(STATIC_VIDEO_PATH, f)) for f in os.listdir(STATIC_VIDEO_PATH) if f.endswith('.mp4'))
     videos_to_delete = existing_videos - current_video_paths
     
     for video in videos_to_delete:

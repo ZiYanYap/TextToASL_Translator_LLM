@@ -1,4 +1,5 @@
 import translators as ts
+from app.config import TARGET_LANGUAGE
 
 def translate_to_english(text: str) -> str:
     try:
@@ -6,7 +7,7 @@ def translate_to_english(text: str) -> str:
             query_text=text,
             translator='google',
             from_language='auto',
-            to_language='en',
+            to_language=TARGET_LANGUAGE,
             timeout=10
         )
         return translated.strip()

@@ -1,14 +1,12 @@
-# Import packages
 import cv2
 import mediapipe as mp
 import numpy as np
+import os
+from app.config import DRAW_COLOR, MERGED_VIDEO_PATH, OUTPUT_VIDEO_PATH
 
 # Build Keypoints using MP Holistic
 mp_holistic = mp.solutions.holistic  # Holistic model
 mp_drawing = mp.solutions.drawing_utils  # Drawing utilities
-
-# Define color for drawing
-DRAW_COLOR = (48, 255, 48)
 
 # Define the ignored pose landmarks
 IGNORED_POSE_LANDMARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21, 22]
@@ -71,7 +69,7 @@ def draw_wrist_connection(image, pose_wrist, hand_wrist):
     # Draw line for wrist connection
     cv2.line(image, pose_wrist_coords, hand_wrist_coords, DRAW_COLOR, thickness=2)
 
-def pose_extraction(video_path='static/temp/merged_video.mp4', output_path='static/temp/output_video.mp4'):
+def pose_extraction(video_path=MERGED_VIDEO_PATH, output_path=OUTPUT_VIDEO_PATH):
     # Initialize MediaPipe Holistic
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         cap = cv2.VideoCapture(video_path)
