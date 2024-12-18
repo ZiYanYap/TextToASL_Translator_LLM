@@ -12,26 +12,24 @@
 
 <body>
     <div class="container">
-        <header>
-            <h1>Text to ASL Translator</h1>
-            <nav class="nav-links">
-                <a href="{{ url_for('index_get') }}" class="nav-button active">ASL Translator</a>
-                <a href="{{ url_for('words_list') }}" class="nav-button">View Supported Words</a>
-                <a href="{{ url_for('metadata') }}" class="nav-button">Add a Word</a>
-            </nav>
-        </header>
+        {% include 'navbar.html' %}
 
         <main class="translator-container">
             <form id="translationForm" method="POST" class="form-group">
                 <div class="translation-boxes">
                     <div class="input-group">
-                        <textarea name="input_text" id="input_text" class="translator-input"
-                            placeholder="Type your text in any language..."
-                            rows="5">{{ original_text if original_text else "" }}</textarea>
-                        <button type="button" id="micButton" class="mic-button" title="Click to speak">
-                            <i class="fas fa-microphone"></i>
-                            <div class="loading-spinner"></div>
-                        </button>
+                        <div class="typing-group">
+                            <textarea name="input_text" id="input_text" class="translator-input"
+                                placeholder="Type your text in any language..."
+                                rows="5"></textarea>
+                            <button type="button" id="micButton" class="mic-button" title="Click to speak">
+                                <i class="fas fa-microphone"></i>
+                                <div class="loading-spinner"></div>
+                            </button>
+                        </div>
+                        <div class="word-count-container">
+                            <span id="wordCount" data-max-tokens="{{ max_tokens }}">0 / {{ max_tokens }} words</span>
+                        </div>
                     </div>
                 </div>
                 <div class="button-group">
@@ -54,11 +52,8 @@
                         </video>
                     </div>
                     <div class="video-controls">
-                        <button id="playBtn" class="control-button">
+                        <button id="playPauseBtn" class="control-button">
                             <i class="fas fa-play"></i> Play
-                        </button>
-                        <button id="pauseBtn" class="control-button">
-                            <i class="fas fa-pause"></i> Pause
                         </button>
                         <button id="restartBtn" class="control-button">
                             <i class="fas fa-redo"></i> Restart

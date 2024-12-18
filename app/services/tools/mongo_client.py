@@ -1,14 +1,6 @@
-import os
 from pymongo import MongoClient
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-DB_NAME = os.getenv("DB_NAME", "asl_project")
-COLLECTION_NAME = os.getenv("COLLECTION_NAME", "word_metadata")
+from app.config import MONGODB_URI, DB_NAME, COLLECTION_NAME
 
 def init_mongo_client():
-    uri = os.getenv("MONGODB_URI")
-    client = MongoClient(uri)
-    return client[DB_NAME][COLLECTION_NAME]
+    client = MongoClient(MONGODB_URI())
+    return client[DB_NAME()][COLLECTION_NAME()]

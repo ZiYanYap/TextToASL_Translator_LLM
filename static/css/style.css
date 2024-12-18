@@ -100,10 +100,6 @@ input[name="word_name"] {
     padding: 12px 20px;
 }
 
-.translator-input {
-    resize: vertical;
-}
-
 /* Form Section Styles */
 .form-section label {
     font-size: 16px;
@@ -250,16 +246,18 @@ nav a:hover {
 }
 
 .toast {
-    min-width: 350px;
+    min-width: 250px;
     max-width: 450px;
     border-radius: var(--border-radius-md);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     transition: opacity 0.5s ease;
+    background-color: #333;
+    color: white;
 }
 
 .toast-header {
-    background-color: #28a745;
-    color: white;
+    background-color: var(--primary-color);
+    color: #000000;
     font-weight: bold;
     border-top-left-radius: var(--border-radius-md);
     border-top-right-radius: var(--border-radius-md);
@@ -279,8 +277,9 @@ nav a:hover {
     background-color: #dc3545;
 }
 
-.toast-error .toast-header {
-    background-color: #c82333;
+.toast.toast-error .toast-header {
+    background-color: var(--error-color);
+    color: white;
 }
 
 /* Navigation styling update */
@@ -393,6 +392,7 @@ nav a:hover {
 
 .translator-input {
     width: 100%;
+    height: 100%;
     padding: 15px;
     border-radius: var(--border-radius-md);
     border: 2px solid #333;
@@ -401,12 +401,7 @@ nav a:hover {
     font-size: 16px;
     transition: var(--transition-standard);
     resize: vertical;
-}
-
-.translator-input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
-    outline: none;
+    padding-right: 50px;
 }
 
 .translate-button {
@@ -540,8 +535,12 @@ input[name="word_name"] {
 
 /* Input group styling */
 .input-group {
-    position: relative;
     width: 100%;
+    display: block;
+}
+
+.typing-group {
+    position: relative;
 }
 
 /* Microphone button styling */
@@ -619,30 +618,6 @@ input[name="word_name"] {
     }
 }
 
-/* Toast styling */
-.toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1055;
-}
-
-.toast {
-    background-color: #333;
-    color: white;
-    min-width: 250px;
-}
-
-.toast-header {
-    background-color: var(--primary-color);
-    color: #000000;
-}
-
-.toast.toast-error .toast-header {
-    background-color: var(--error-color);
-    color: white;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .mic-button {
@@ -668,12 +643,6 @@ input[name="word_name"] {
     width: 100%;
 }
 
-.translation-boxes .input-group {
-    flex: 1;
-    position: relative;  /* For positioning the mic button */
-    width: 50%;  /* Each box takes half the width */
-}
-
 /* Update microphone button positioning */
 .mic-button {
     position: absolute;
@@ -693,21 +662,26 @@ input[name="word_name"] {
     z-index: 2;
 }
 
-/* Ensure textareas take full width of their containers */
-.translator-input {
-    width: 100%;
-    height: 100%;
-    padding-right: 50px;  /* Make space for the mic button */
+.word-count-container {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #bbb;
+    text-align: right;
+}
+
+.word-count-container span {
+    font-weight: bold;
+    color: #fff;
+}
+
+.word-count-container.over-limit span {
+    color: #f44336; /* Red color when over the limit */
 }
 
 /* Responsive design for mobile */
 @media (max-width: 768px) {
     .translation-boxes {
         flex-direction: column;
-    }
-    
-    .translation-boxes .input-group {
-        width: 100%;
     }
 }
 
@@ -802,7 +776,6 @@ html {
 
 /* Add focus-visible for better accessibility */
 .nav-button:focus-visible,
-.translator-input:focus-visible,
 .control-button:focus-visible {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;

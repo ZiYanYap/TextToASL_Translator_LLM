@@ -1,0 +1,8 @@
+<header>
+    <h1>{{ page_title }}</h1>
+    <nav class="nav-links">
+        <a href="{{ url_for('render_index') }}" class="nav-button {% if 'render_index' in request.endpoint %}active{% endif %}">ASL Translator</a>
+        <a href="{{ url_for('render_words_list') }}" class="nav-button {% if 'render_words_list' in request.endpoint %}active{% endif %}">View Supported Words</a>
+        <a href="{{ url_for('handle_metadata') }}" class="nav-button {% if 'handle_metadata' in request.endpoint %}active{% endif %}">Add a Word</a>
+    </nav>
+</header>
