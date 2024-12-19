@@ -53,7 +53,7 @@ def translate_to_english_api():
         return jsonify({"error": "No input text provided"}), 400
     try:
         english_text = translate_to_english(original_text)
-        print(english_text)
+        print(f'Translated text: {english_text}')
         return jsonify({"english_text": english_text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -70,7 +70,7 @@ def convert_to_asl_api():
     
     try:
         asl_translation = convert_to_asl(english_text)
-        print(asl_translation)
+        print(f'ASL Gloss generated: {asl_translation}')
         return jsonify({"asl_translation": asl_translation})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -83,6 +83,7 @@ def prepare_video_api():
         return jsonify({"error": "No ASL translation provided"}), 400
     try:
         if prepare_display_data(asl_translation, context=context):
+            print("Video merge complete")
             return jsonify({"video_ready": True})
         else:
             return jsonify({"video_ready": False}), 400
@@ -93,6 +94,7 @@ def prepare_video_api():
 def pose_extraction_api():
     try:
         output_path = pose_extraction()
+        print("Pose extraction complete")
         return jsonify({"output_path": output_path})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
