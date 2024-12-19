@@ -1,7 +1,6 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-import os
 from app.config import DRAW_COLOR, MERGED_VIDEO_PATH, OUTPUT_VIDEO_PATH
 
 # Build Keypoints using MP Holistic
