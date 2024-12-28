@@ -4,7 +4,7 @@ A Python Flask application that utilises prompt engineering technique on LLM to 
 ## Installation
 1. Clone the repository:
     ```bash
-    git clone https://github.com/YOUR_USERNAME/TextToASL_Translator_LLM.git
+    git clone https://github.com/ZiYanYap/TextToASL_Translator_LLM.git
     ```
 2. Navigate to the project directory:
     ```bash
