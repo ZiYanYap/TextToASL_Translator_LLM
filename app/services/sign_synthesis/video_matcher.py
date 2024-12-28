@@ -1,36 +1,17 @@
 import os
-import requests
 from moviepy import VideoFileClip, concatenate_videoclips
-from app.services.tools.mongo_client import init_mongo_client
-from app.config import WSD_API_URL, STATIC_VIDEO_PATH, TEMP_VIDEO_PATH, MERGED_VIDEO_PATH, HF_HEADERS
+from app.services.sign_synthesis.text_disambiguation import *
+from app.services.utils.mongo_utils import fetch_document
+from app.services.utils.video_utils import construct_video_path
+from app.config import TEMP_VIDEO_PATH, MERGED_VIDEO_PATH
 
-# Get video path based on URL
-def construct_video_path(video_url):
-    if not video_url:
-        return None
-    if "youtube.com" in video_url or "youtu.be" in video_url:
-        video_filename = video_url.split('/')[-1] if 'youtu.be' in video_url else video_url.split('v=')[-1]
-        return os.path.normpath(os.path.join(STATIC_VIDEO_PATH, f"{video_filename}.mp4"))
-    return os.path.normpath(os.path.join(STATIC_VIDEO_PATH, video_url.split('/')[-1]))
-
-# Query the LLM API
-def query_llm(prompt):
-    response = requests.post(WSD_API_URL, headers=HF_HEADERS, json={"inputs": prompt})
-    if response.status_code != 200:
-        print(f"Error querying LLM: {response.status_code} - {response.text}")
-        return ""
-    return ''.join(c for c in response.json()[0]["generated_text"] if c.isalnum())
-
-# Fetch word document from MongoDB
-def fetch_word_document(collection, word):
-    return collection.find_one({"words": word})
-
-# Fetch character document from MongoDB
-def fetch_character_document(collection, char):
-    return collection.find_one({"words": char})
-
-# Merge video files
 def merge_video_files(video_paths):
+    """
+    Merges multiple video files into a single video file.
+    
+    Args:
+        video_paths (list): List of file paths to the video files to be merged.
+    """
     clips = [VideoFileClip(path, target_resolution=(480,360)) for path in video_paths]
     final_clip = concatenate_videoclips(clips, method="compose")
     os.makedirs(TEMP_VIDEO_PATH, exist_ok=True)
@@ -39,23 +20,23 @@ def merge_video_files(video_paths):
         clip.close()
     final_clip.close()
 
-# Handle definitions and return video mapping
 def handle_definitions(definitions, word, context):
+    """
+    Handles multiple definitions of a word and returns the video mapping.
+    
+    Args:
+        definitions (list): List of definitions for the word.
+        word (str): The word being processed.
+        context (str): The context in which the word is used.
+        
+    Returns:
+        list: List of tuples containing the word and its corresponding video path.
+    """
     word_video_map = []
     if len(definitions) > 1 and context:
         print(f'Handling ambiguity for "{word}"')
-        descriptions = [f"{i + 1}. {d.get('meaning')}" for i, d in enumerate(definitions)]
-        prompt = (
-            f'Word Sense Disambiguation Task:\n\n'
-            f'Word: "{word.upper()}"\n'
-            f'Sentence: "{context}"\n\n'
-            f'Meanings:\n'
-            f'{chr(10).join([f"{description}" for description in descriptions])}\n\n'
-            f'Instructions:\n'
-            f'Based on the context provided in the sentence, identify which meaning of the word "{word.upper()}" is most appropriate.\n'
-            f'Return the number corresponding to the correct meaning.'
-        )
-        response = query_llm(prompt)
+        meanings = [d.get("meaning") for d in definitions]
+        response = query_wsd(word, context, meanings)
 
         selected_index = parse_llm_response(response, len(definitions))
         video_url = definitions[selected_index].get("video_url")
@@ -71,19 +52,37 @@ def handle_definitions(definitions, word, context):
                 break
     return word_video_map
 
-# Parse LLM response
 def parse_llm_response(response, num_definitions):
+    """
+    Parses the response from the LLM to determine the selected definition.
+    
+    Args:
+        response (str): The response from the LLM.
+        num_definitions (int): The number of definitions available.
+        
+    Returns:
+        int: The index of the selected definition.
+    """
     try:
         selected_index = int(response.strip()) - 1
-        return max(0, min(selected_index, num_definitions - 1))  # Ensure within bounds
+        return max(0, min(selected_index, num_definitions - 1))
     except ValueError:
-        return 0  # Default to first definition if parsing fails
+        return 0
 
-# Fingerspell a word
 def fingerspell_word(collection, word):
+    """
+    Generates a video mapping for fingerspelling a word.
+    
+    Args:
+        collection: The MongoDB collection to fetch data from.
+        word (str): The word to be fingerspelled.
+        
+    Returns:
+        list: List of tuples containing each character and its corresponding video path.
+    """
     word_video_map = []
     for char in word:
-        char_doc = fetch_character_document(collection, char)
+        char_doc = fetch_document(collection, char)
         if char_doc and char_doc.get("definitions"):
             video_url = char_doc["definitions"][0].get("video_url")
             if video_url:
@@ -91,33 +90,38 @@ def fingerspell_word(collection, word):
                 word_video_map.append((char, video_path))
     return word_video_map
 
-# Get video mapping for a word
 def get_word_video_mapping(collection, word, context=None):
-    word = word.lower().strip()
-
-    # Step 1: Handle question mark and split if necessary
+    """
+    Retrieves the video mapping for a given word.
+    
+    Args:
+        collection: The MongoDB collection to fetch data from.
+        word (str): The word to be mapped to a video.
+        context (str, optional): The context in which the word is used.
+        
+    Returns:
+        list: List of tuples containing the word and its corresponding video path.
+    """
     words_to_check = []
     for token in word.split():
         if '?' in token:
             token = token.replace('?', '')
-            if token:  # Add the word only if it's not empty
+            if token:
                 words_to_check.append(token)
-            words_to_check.append('?')  # Add the question mark separately
+            words_to_check.append('?')
         else:
             words_to_check.append(token)
 
-    # Step 2: Handle hyphenated words only after question mark handling
     processed_words = []
     for w in words_to_check:
-        if '-' in w and not fetch_word_document(collection, w):
+        if '-' in w and not fetch_document(collection, w):
             processed_words.extend(w.replace('-', ' ').split())
         else:
             processed_words.append(w)
 
-    # Step 3: Map words to their video paths
     word_video_map = []
     for w in processed_words:
-        document = fetch_word_document(collection, w)
+        document = fetch_document(collection, w)
         if document:
             word_video_map.extend(handle_definitions(document.get("definitions", []), w, context))
         else:
@@ -125,17 +129,34 @@ def get_word_video_mapping(collection, word, context=None):
 
     return word_video_map
 
-# Prepare display data
-def prepare_display_data(asl_translation, context=None):
+def prepare_display_data(asl_translation, context=None, collection=None):
+    """
+    Prepares the display data for the ASL translation.
+    
+    Args:
+        asl_translation (str): The ASL translation text.
+        context (str, optional): The context in which the translation is used.
+        collection: The MongoDB collection to fetch data from.
+        
+    Returns:
+        bool: True if the display data was prepared successfully, False otherwise.
+    """
     if not asl_translation:
         return False
-    
+
+    named_entities = query_named_entities(asl_translation, context)
+    normalized_named_entities = [pn.lower().strip() for pn in named_entities]
+    print(f'Named entities detected: {normalized_named_entities}')
+
     display_data = []
-    collection = init_mongo_client()
-    for word in asl_translation.split():
-        word_mapping = get_word_video_mapping(collection, word, context=context)
-        display_data.extend(word_mapping)
-    
+    normalized_translation = [word.lower().strip() for word in asl_translation.split()]
+    for normalized_word in normalized_translation:
+        if (normalized_word in normalized_named_entities):
+            display_data.extend(fingerspell_word(collection, normalized_word))
+        else:
+            word_mapping = get_word_video_mapping(collection, normalized_word, context=context)
+            display_data.extend(word_mapping)
+
     video_paths = [path for _, path in display_data]
     merge_video_files(video_paths)
 
