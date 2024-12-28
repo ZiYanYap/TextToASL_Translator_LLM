@@ -2,8 +2,6 @@ from app.services.translation.prompt_template import SYSTEM_PROMPT
 from app.services.utils.llm_query import query_llm
 from app.config import MAX_TOKENS
 
-system_message = {"role": "system", "content": SYSTEM_PROMPT}
-
 WH_WORDS = {"what", "where", "who", "when", "why", "which", "whom", "how", "whose", "how-much", "how-many"}
 
 def post_process_asl_response(response: str) -> str:
@@ -40,7 +38,7 @@ def convert_to_asl(input_text: str):
 
     try:
         messages = [
-            system_message,
+            {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": f"'{input_text}'"}
         ]
 
