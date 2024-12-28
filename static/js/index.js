@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const wordCountDisplay = document.getElementById('wordCount');
     const submitButton = document.getElementById('submitButton');
     const errorContainer = document.getElementById('errorContainer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
 
     const MAX_TOKENS = parseInt(wordCountDisplay.getAttribute('data-max-tokens'), 10);
 
@@ -98,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeVideoControls() {
         const video = document.getElementById('outputVideo');
-        const playPauseBtn = document.getElementById('playPauseBtn');
         const restartBtn = document.getElementById('restartBtn');
     
         // Play/Pause button functionality
@@ -141,6 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
         outputContainer.style.display = 'none';
         videoContainer.style.display = 'none';
         clearError();
+
+        // Reset play/pause button text to "Play"
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i> Play'; // Add this line
 
         // Disable the button and show loading spinner
         submitButton.disabled = true;
