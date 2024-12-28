@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Word Count Functionality
     textarea.addEventListener('input', updateWordCount);
+    textarea.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            document.getElementById('translationForm').dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+    });
 
     function updateWordCount() {
         const words = textarea.value.trim().split(/\s+/).filter(word => word.length > 0); // Filter out empty words
