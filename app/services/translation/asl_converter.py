@@ -39,7 +39,7 @@ def convert_to_asl(input_text: str):
     try:
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"'{input_text}'"}
+            {"role": "user", "content": f'Input Sentence: "{input_text}"\nOutput:'}
         ]
 
         response_content = query_llm(messages, temperature=0.2, max_tokens=MAX_TOKENS, top_p=0.8)
