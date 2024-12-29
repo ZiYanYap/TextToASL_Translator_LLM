@@ -92,6 +92,7 @@ Indicate plurality by using repetition or adding the appropriate sign, unless a 
 ### Important Reminders:
 - Be Concise: Only use necessary words, following ASL gloss syntax.
 - No Non-Manual Markers: Do not include any eyebrow or body movement markers.
+- If there are any typos or sentences you do not understand, return "..."
 
 Input Sentence: "[Insert English sentence here]"
 
