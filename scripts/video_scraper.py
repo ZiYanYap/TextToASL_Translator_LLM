@@ -14,8 +14,8 @@ def download_video(url, save_path):
     Downloads a video from the given URL and saves it to the specified path.
 
     Args:
-        url: The URL of the video.
-        save_path: The path where the video will be saved.
+        url (str): The URL of the video.
+        save_path (str): The path where the video will be saved.
     """
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     
@@ -55,6 +55,14 @@ def download_video(url, save_path):
             os.remove(save_path)
 
 def process_document(doc, executor, current_video_paths):
+    """
+    Processes a document to download videos for each definition.
+
+    Args:
+        doc (dict): The document containing video URLs.
+        executor (ThreadPoolExecutor): The executor for managing threads.
+        current_video_paths (set): A set to keep track of current video paths.
+    """
     for definition in doc.get('definitions', []):
         video_url = definition.get('video_url')
         if video_url:
@@ -64,6 +72,9 @@ def process_document(doc, executor, current_video_paths):
             executor.submit(download_video, video_url, video_path)
 
 def scrape_videos():
+    """
+    Scrapes videos from the database and downloads them.
+    """
     documents = collection.find({})
     futures = []
     
@@ -79,6 +90,12 @@ def scrape_videos():
     clean_up_old_videos(current_video_paths)
 
 def clean_up_old_videos(current_video_paths):
+    """
+    Cleans up old videos that are no longer in the current video paths.
+
+    Args:
+        current_video_paths (set): A set of current video paths.
+    """
     existing_videos = set(os.path.normpath(os.path.join(STATIC_VIDEO_PATH, f)) for f in os.listdir(STATIC_VIDEO_PATH) if f.endswith('.mp4'))
     videos_to_delete = existing_videos - current_video_paths
     
