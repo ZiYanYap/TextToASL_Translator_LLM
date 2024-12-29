@@ -100,7 +100,7 @@ def pose_extraction(video_path=MERGED_VIDEO_PATH, output_path=OUTPUT_VIDEO_PATH,
     Returns:
         The path to the output video file.
     """
-    with mp_holistic.Holistic(model_complexity=0, min_detection_confidence=0.0, min_tracking_confidence=0.0) as holistic:
+    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         cap = cv2.VideoCapture(video_path)
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
