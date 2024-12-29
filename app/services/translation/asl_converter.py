@@ -14,6 +14,10 @@ def post_process_asl_response(response: str) -> str:
     Returns:
         str: The cleaned and post-processed ASL response.
     """
+    # Remove "ASL Gloss:" if it exists
+    if response.startswith("ASL Gloss:"):
+        response = response[len("ASL Gloss:"):].strip()
+
     cleaned_response = response.strip().strip('"').rstrip('.,')
     words = cleaned_response.split()
     last_word = words[-1].rstrip('?')
@@ -39,7 +43,7 @@ def convert_to_asl(input_text: str):
     try:
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f'Input Sentence: "{input_text}"\nOutput:'}
+            {"role": "user", "content": f'Input Sentence: "{input_text}"'}
         ]
 
         response_content = query_llm(messages, temperature=0.2, max_tokens=MAX_TOKENS, top_p=0.8)
